@@ -57,7 +57,7 @@ import {genFileId, UploadRequestOptions} from 'element-plus'
 import type { UploadFile,UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 import {appearMessage} from "@/utils/elementUtils";
 import {deleteFile} from "@/apis/common";
-import {DT} from "@/types/blog";
+import {DT} from "@/utils/constStr";
 
 const upload = ref<UploadInstance>()
 const dialogImageUrl = ref<String>(null)

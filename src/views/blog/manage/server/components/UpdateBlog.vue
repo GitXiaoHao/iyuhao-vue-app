@@ -153,15 +153,17 @@ import type {FormInstance, FormRules} from 'element-plus'
 // 新增博客
 import {ElDrawer} from "element-plus";
 import {deleteFile, uploadFile} from "@/apis/common";
-import {globalInfo, MsgType} from "@/utils/constStr";
+import {DT, globalInfo, MsgType} from "@/utils/constStr";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
 import {onMounted, reactive, ref} from 'vue'
-import {ArticleType, BlogCategory, BlogArticleForm, DT} from "@/types/blog";
+
 import CoverUpload from "@/components/CoverUpload.vue";
 import {useBlogStore} from "@/store/modules/blog";
 import go from "@/utils/common";
 import {Bottom, Top} from "@element-plus/icons-vue";
 import {getBlogApi} from "@/apis/blog/article";
+import {BlogCategory} from "@/types/blog/category";
+import {ArticleType, BlogArticleForm} from "@/types/blog/article";
 
 const emits = defineEmits(['closeDrawer', 'selectBlogListByPage'])
 const props = defineProps({
@@ -226,7 +228,7 @@ const editorChange = (text, html) => {
 
 
 const blogStore = useBlogStore()
-const formSize = ref('large')
+const formSize = ref<String>("large")
 const settingFormRef = ref<FormInstance>()
 const coverUploadRef = ref(null)
 const coverUploadFile = reactive([])

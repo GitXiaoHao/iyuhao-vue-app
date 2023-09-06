@@ -14,20 +14,7 @@ import blogRouter from "@/router/modules/blog";
 
 
 const constantRoutes = [
-    {
-        path: '/',
-        meta: {
-            title: '首页'
-        },
-        component: () => import("@/views/home/Index.vue"),
-    },
-    {
-        path: '/user',
-        meta: {
-            title: '用户登录'
-        },
-        component: () => import("@/views/user/Index.vue")
-    }
+
 ]
 
 
@@ -41,7 +28,7 @@ const defaultTitle = 'home';
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next) => {
     //是否有token
     document.title = to.meta.title ? to.meta.title : defaultTitle;
-    if (to.path == '/user' || to.path == '/blog/manage/login') {
+    if (to.path == '/login') {
         return next()
     }
     const userStore = useUserStore()
@@ -49,14 +36,13 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
     if (!accessToken) {
         //没有token
         //弹窗
-        appearMessageBox("没有登陆，请先登录", "提示", MsgType.warning, '普通用户登录', '管理员登录')
+        appearMessageBox("没有登陆，请先登录", "提示", MsgType.warning, '登录', '退出')
             .then(r => {
-                router.push('/user').then(r => {
+                router.push('/login').then(r => {
                 })
                 return
             }).catch(r => {
-            router.push('/blog/manage/login').then(r => {
-            })
+
             return
         })
     }

@@ -156,10 +156,10 @@ import Cover from "@/components/Cover.vue";
 import {DialogType} from "@/types/dialog";
 import Dialog from "@/components/Dialog.vue";
 import {FormInstance, FormRules} from "element-plus";
-import {BlogSpecial, ButtonType, DT} from "@/types/blog";
 import CoverUpload from "@/components/CoverUpload.vue";
-import {globalInfo, MsgType} from "@/utils/constStr";
+import {ButtonType, DT, globalInfo, MsgType} from "@/utils/constStr";
 import {deleteSpecialApi, getSpecialListByPageApi, updateSpecialApi} from "@/apis/blog/special";
+import {BlogSpecial} from "@/types/blog/special";
 
 const columns = reactive<ColumnType[]>(
     [

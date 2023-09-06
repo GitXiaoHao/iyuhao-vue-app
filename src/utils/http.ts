@@ -7,7 +7,7 @@ import {appearLoading, appearMessage,} from "@/utils/elementUtils";
 
 
 import {useUserStore} from "@/store/modules/user";
-import {baseURL} from "@/utils/constStr";
+import {accessTokenStr, baseURL} from "@/utils/constStr";
 
 
 let loading = null
@@ -30,7 +30,6 @@ const httpInstance = axios.create({
 // 添加请求拦截器
 httpInstance.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
-
     //是否出现加载界面
     if (!loading) {
         if (config.data.showLoading) {
@@ -43,7 +42,7 @@ httpInstance.interceptors.request.use(function (config) {
     // 设置token start
     let accessToken = userStore.getToken;
     if (accessToken && accessToken !== '') {
-        config.headers.common['Authorization'] = accessToken;
+        config.headers.Authorization = accessToken;
     }
     return config;
 }, function (error) {
@@ -66,6 +65,9 @@ httpInstance.interceptors.response.use(function (response) {
     }
     if (response.data.code == 205) {
         //登录超时
+        //登出
+        userStore.setUserInfo(null)
+        userStore.setToken('')
         return Promise.reject("登录超时")
     }
     return response.data;

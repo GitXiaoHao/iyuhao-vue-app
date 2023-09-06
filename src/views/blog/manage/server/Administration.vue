@@ -8,7 +8,7 @@ import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
 import Cover from "@/components/Cover.vue";
 import {getArticleByPage} from "@/apis/blog/article";
 import {getStatusList} from "@/apis/blog/status";
-import {DT} from "@/types/blog";
+import {DT} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
 //搜索部分
 const addBlogStr = ref("新增博客")

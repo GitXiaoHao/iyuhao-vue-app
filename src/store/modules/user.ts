@@ -22,7 +22,7 @@ export const useUserStore = defineStore({
         }
     },
     actions: {
-        setUserInfo(info: UserInfo) {
+        setUserInfo(info: UserInfo | null) {
             this.userInfo = info
         },
         setToken(tokenInfo: string | undefined) {

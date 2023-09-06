@@ -114,13 +114,13 @@
 <script setup lang="ts">
 import {onBeforeMount, onMounted, reactive, ref} from 'vue'
 import CoverUpload from "@/components/CoverUpload.vue";
-import {ButtonType, DT} from "@/types/blog";
 import {FormInstance, FormRules} from "element-plus";
 import Dialog from "@/components/Dialog.vue";
 import {DialogType} from "@/types/dialog";
 import {UserInfo} from "@/types/user";
 const loading = ref(true)
 import { CountTo } from 'vue3-count-to';
+import {ButtonType, DT} from "@/utils/constStr";
 
 
 const coverUploadRef = ref(null)

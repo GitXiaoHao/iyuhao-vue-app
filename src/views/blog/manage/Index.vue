@@ -98,12 +98,12 @@ const menuList = reactive([
       {
         id: '1231',
         title: '博客管理',
-        path: '/blog/manage/administration',
+        path: '/administration',
       },
       {
         id: '1232',
         title: '分类管理',
-        path: '/blog/manage/category',
+        path: '/category',
       }
     ],
   },
@@ -116,7 +116,7 @@ const menuList = reactive([
       {
         id: '1241',
         title: '专题管理',
-        path: '/blog/manage/special',
+        path: '/special',
       },
     ],
   },
@@ -129,17 +129,17 @@ const menuList = reactive([
       {
         id: '1251',
         title: '个人信息',
-        path: '/blog/manage/userInformation',
+        path: '/userInformation',
       },
       {
         id: '1252',
         title: '博客成员',
-        path: '/blog/manage/member',
+        path: '/member',
       },
       {
         id: '1253',
         title: '系统设置',
-        path: '/blog/list',
+        path: '/member',
       },
     ],
   },

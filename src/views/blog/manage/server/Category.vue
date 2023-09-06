@@ -85,9 +85,9 @@ import Cover from "@/components/Cover.vue";
 import { DialogType} from "@/types/dialog";
 import Dialog from "@/components/Dialog.vue";
 import {FormInstance, FormRules} from "element-plus";
-import {BlogCategory, ButtonType, DT} from "@/types/blog";
 import CoverUpload from "@/components/CoverUpload.vue";
-import {globalInfo, MsgType} from "@/utils/constStr";
+import {ButtonType, DT, globalInfo, MsgType} from "@/utils/constStr";
+import {BlogCategory} from "@/types/blog/category";
 
 const columns = reactive<ColumnType[]>(
     [
@@ -96,6 +96,7 @@ const columns = reactive<ColumnType[]>(
         prop: 'blogCategoryCover',
         width: 120,
         align: 'center',
+        fixed: 'left',
         scopedSlots: "cover"
       },
       {
@@ -109,7 +110,7 @@ const columns = reactive<ColumnType[]>(
         label: '简介',
         prop: 'blogCategoryDesc',
         align: 'left',
-        width: 350,
+        // width: 350,
         scopedSlots: false
       },
       {
@@ -123,6 +124,8 @@ const columns = reactive<ColumnType[]>(
         label: '操作',
         prop: 'op',
         align: 'center',
+        fixed: "right",
+        width: 180,
         scopedSlots: "op"
       },
     ]
@@ -146,7 +149,7 @@ const tableOptions = reactive<OptionsType>({
   stripe: true,
   extHeight: 900,
   showIndex: false,
-  selectType: "checkbox"
+  selectType: null,
 })
 
 const getTableData = async (page: number = 1, pageSize: number = 5) => {

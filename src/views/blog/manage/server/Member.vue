@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import Table from "@/components/Table.vue";
 import {onMounted, reactive, ref} from "vue";
-import {
-  MemberSearchDataType
-} from "@/types/blog";
-
 import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
 import Cover from "@/components/Cover.vue";
 import {getMemberByPageApi} from "@/apis/user";
 import {UserInfo} from "@/types/user";
+import {MemberSearchDataType} from "@/types/blog/member";
 //搜索部分
 const addMemberStr = ref("新增账号")
 const dialog = ref(false)
