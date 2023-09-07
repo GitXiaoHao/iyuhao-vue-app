@@ -20,11 +20,13 @@
             </template>
           </el-dropdown>
           <!--          <div class="avatar"><img :src="userInfo.avatar"></div>-->
-          <div class="avatar"><img src="@/assets/image/github.png" alt=""></div>
+          <div class="avatar">
+            <el-avatar :size="50" :src="globalInfo.imageUrl +userInfo.userCover"></el-avatar>
+          </div>
         </div>
       </el-header>
       <el-container class="el-container-body">
-        <el-aside width="200px" class="left-aside">
+        <el-aside width="collapse" class="left-aside">
           <div class="left-div">
             <el-button class="post-btn">发布</el-button>
 
@@ -39,18 +41,21 @@
                 @close="handleClose"
 
             >
-              <el-sub-menu :index="menuItem.id" v-for="(menuItem) in menuList" class="sub-menu">
+              <el-sub-menu :index="menuItem.id"
+                           v-for="(menuItem) in menuList"
+                           :disabled="menuItem.disabled"
+                           class="sub-menu">
                 <template #title>
                   <span :class="'iconfont ' + menuItem.icon" class="sub-icon"></span>
                   <span class="sub-title">{{ menuItem.title }}</span>
                 </template>
-                <el-menu-item-group>
-                  <el-menu-item :index="menuChildrenItem.id" v-for="(menuChildrenItem) in menuItem.children">
+                <el-menu-item-group >
+                  <el-menu-item :index="menuChildrenItem.id"
+                                v-for="(menuChildrenItem) in menuItem.children"
+                                :disabled="menuChildrenItem.disabled || false">
                     <RouterLink class="sub-menu-link"
                                 :to="menuChildrenItem.path"
-                                :class="activePath === menuChildrenItem.path ? 'link-active': ''"
                     >{{ menuChildrenItem.title }}</RouterLink>
-                    <!--                    {{ menuChildrenItem.title }}-->
                   </el-menu-item>
                 </el-menu-item-group>
               </el-sub-menu>
@@ -66,21 +71,17 @@
 </template>
 
 <script setup lang="ts">
-import {
-  Delete,
-  InfoFilled,
-  ArrowDown
-} from '@element-plus/icons-vue'
+import {ArrowDown, Delete, InfoFilled,} from '@element-plus/icons-vue'
 import {onBeforeMount, onMounted, reactive, ref, watch} from "vue";
-import UserInfo from "@/types/store";
 import {useUserStore} from "@/store/modules/user";
 import {useBlogStore} from "@/store/modules/blog";
-import {userMenu} from "@/utils/constStr";
+import {globalInfo, userMenu} from "@/utils/constStr";
 import {useRoute, useRouter} from "vue-router";
+import {UserInfo} from "@/types/user";
 
-let userInfo = reactive<UserInfo>({
-  userName: '小豪',
-  userId: '1', userCover: "", userEmail: "", userPassword: ""
+const userInfo = reactive<UserInfo>({
+  userName: null,
+  userCover: null,
 })
 const loading = ref(false)
 const activePath = ref<string>()
@@ -98,14 +99,31 @@ const menuList = reactive([
       {
         id: '1231',
         title: '博客管理',
+        disabled: false,
         path: '/administration',
       },
+
+    ],
+  },
+  {
+    id: '127',
+    title: '分类',
+    icon: 'icon-grouping',
+    disabled: false,
+    children: [
       {
-        id: '1232',
+        id: '1271',
+        disabled: false,
         title: '分类管理',
         path: '/category',
+      },
+      {
+        id: '1272',
+        disabled: false,
+        title: '分类类型',
+        path: '/ct',
       }
-    ],
+    ]
   },
   {
     id: '124',
@@ -118,6 +136,16 @@ const menuList = reactive([
         title: '专题管理',
         path: '/special',
       },
+      {
+        id: '1242',
+        title: '状态管理',
+        path: '/status',
+      },
+      {
+        id: '1243',
+        title: '标签管理',
+        path: '/label',
+      },
     ],
   },
   {
@@ -128,16 +156,19 @@ const menuList = reactive([
     children: [
       {
         id: '1251',
+        disabled: false,
         title: '个人信息',
         path: '/userInformation',
       },
       {
         id: '1252',
+        disabled: true,
         title: '博客成员',
         path: '/member',
       },
       {
         id: '1253',
+        disabled: true,
         title: '系统设置',
         path: '/member',
       },
@@ -147,20 +178,33 @@ const menuList = reactive([
     id: '126',
     title: '回收站',
     icon: 'icon-huishouzhan',
-    disabled: false,
+    disabled: true,
     children: [
       {
         id: '126',
-        title: '回收站',
-        path: ''
+        disabled: true,
+        title: '分类',
+        path: '/crb'
       }
     ]
   }
-
 ])
+const exit =() => {
+  userStore.setUserInfo({})
+  userStore.setToken('')
+  //跳转登录页
+  router.push("/login")
+}
+
 
 const handleCommand = (command: string | number | object | userMenu) => {
-  console.log(command)
+  //点击下拉菜单
+  if(command == userMenu.information){
+    router.push('/userInformation')
+  }else if(command == userMenu.exit){
+    //退出
+    exit()
+  }
 }
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
@@ -181,10 +225,9 @@ onBeforeMount(() => {
 })
 onMounted(async () => {
   //获取用户信息
-  // userInfo.value = userStore.getUsrInfo
+  Object.assign(userInfo,userStore.getUserInfo)
   activePath.value = menuList[0].children[0].path
   loading.value = false
-
 })
 </script>
 
@@ -214,11 +257,7 @@ onMounted(async () => {
       }
       .avatar{
         width: 60px;
-        img{
-          cursor: pointer;
-          border-radius: 30px;
-          width: 100%;
-        }
+        margin: 8px;
       }
     }
   }
@@ -270,5 +309,10 @@ onMounted(async () => {
     }
   }
 }
+.is-active{
 
+}
+.active{
+  color: #f6e58d !important;
+}
 </style>

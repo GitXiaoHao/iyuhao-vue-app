@@ -1,32 +1,46 @@
 import {defineStore} from "pinia";
-import {accessTokenStr, Nullable} from "@/utils/constStr";
-import UserInfo from "@/types/store";
+import {accessInfoStr, accessTokenStr, Nullable} from "@/utils/constStr";
+import {UserInfo} from "@/types/user";
+
 
 interface UserState {
-    userInfo: Nullable<UserInfo>,
+    userInfo: UserInfo,
     token: string | undefined
 }
 
 export const useUserStore = defineStore({
     id: 'user',
     state: (): UserState => ({
-        userInfo: null,
+        userInfo: {},
         token: undefined
     }),
+    persist: {
+        enabled: true,
+        strategies: [
+            {
+                storage: localStorage,
+                paths: ['userInfo','token']
+            }
+        ],
+    },
     getters: {
-        getUsrInfo(): UserInfo{
-            return <UserInfo>this.userInfo
+        getUserInfo(): UserInfo {
+            return this.userInfo
         },
         getToken(): string {
             return this.token || localStorage.getItem(accessTokenStr)
         }
     },
     actions: {
-        setUserInfo(info: UserInfo | null) {
-            this.userInfo = info
+        setUserInfo(info: UserInfo) {
+            Object.assign(this.userInfo, info)
         },
         setToken(tokenInfo: string | undefined) {
             this.token = tokenInfo ? tokenInfo : ''
+            if(tokenInfo == ''){
+                localStorage.removeItem(accessTokenStr)
+                return
+            }
             localStorage.setItem(accessTokenStr, this.token);
         }
     }

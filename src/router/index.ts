@@ -7,7 +7,7 @@
 
 import {createRouter, createWebHashHistory, RouteLocationNormalized, Router} from "vue-router";
 import type {App} from 'vue';
-import {MsgType} from "@/utils/constStr";
+import {accessTokenStr, MsgType} from "@/utils/constStr";
 import {useUserStore} from "@/store/modules/user";
 import {appearMessageBox} from "@/utils/elementUtils";
 import blogRouter from "@/router/modules/blog";
@@ -23,6 +23,7 @@ const routers = [...blogRouter, ...constantRoutes,]
 export const router: Router = new createRouter({
     routes: routers,
     history: createWebHashHistory(),
+    linkActiveClass: 'active',
 })
 const defaultTitle = 'home';
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next) => {

@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
 import {globalInfo} from '@/utils/constStr'
 import { Delete, Download, Plus, ZoomIn } from '@element-plus/icons-vue'
 import {genFileId, UploadRequestOptions} from 'element-plus'
@@ -87,7 +87,7 @@ const deletePic = async (file?:UploadFile) => {
   if(dialogImageUrl.value && props.dialogType == DT.add){
     const res = await deleteFile(dialogImageUrl.value)
   }
-  upload.value!.clearFiles()
+  // upload.value!.clearFiles()
   dialogImageUrl.value = null
 }
 const beforeUpload  = (file)=> {
@@ -142,14 +142,11 @@ const handleDownload = (file: UploadFile) => {
   a.dispatchEvent(event);
 }
 
+
 defineExpose({
   deletePic,
-  dialogImageUrl
+  dialogImageUrl,
 })
-
-
-
-
 
 
 

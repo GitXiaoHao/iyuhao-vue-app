@@ -24,4 +24,6 @@ export interface BlogStatus {
      */
     blogStatusUpdateTime?: String
 
+    blogStatusDisable?: Number
+
 }

@@ -53,7 +53,7 @@ export const appearLoading = (text: string = "加载中") => {
 }
 
 
-export const appearMessageBox = (msg: string, title: string, type: MsgType = MsgType.success, confirmButtonText: string = 'OK', cancelButtonText: string = 'Cancel') => {
+export const appearMessageBox = (msg: string, title: string, type: MsgType = MsgType.success, confirmButtonText: string = '确认', cancelButtonText: string = '取消') => {
     return ElMessageBox.confirm(
         msg,
         title,

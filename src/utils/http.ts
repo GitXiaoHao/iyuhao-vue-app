@@ -8,10 +8,12 @@ import {appearLoading, appearMessage,} from "@/utils/elementUtils";
 
 import {useUserStore} from "@/store/modules/user";
 import {accessTokenStr, baseURL} from "@/utils/constStr";
+import {useRouter} from "vue-router";
 
 
 let loading = null
 const userStore = useUserStore()
+const router = useRouter()
 // axios.defaults.withCredentials = true
 const httpInstance = axios.create({
     //基地址
@@ -66,8 +68,12 @@ httpInstance.interceptors.response.use(function (response) {
     if (response.data.code == 205) {
         //登录超时
         //登出
-        userStore.setUserInfo(null)
+        userStore.setUserInfo({})
         userStore.setToken('')
+        appearMessage.error("登陆超时")
+        setTimeout(() => {
+            router.push("/login").then(r => {})
+        },1000)
         return Promise.reject("登录超时")
     }
     return response.data;

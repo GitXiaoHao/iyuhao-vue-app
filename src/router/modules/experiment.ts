@@ -21,6 +21,6 @@ export const experimentRouter = [
     {
         path: experimentBasePath + '/2',
         name: '分类管理',
-        component: () => import("@/views/blog/manage/server/Category.vue")
+        component: () => import("@/views/blog/manage/server/category/Category.vue")
     },
 ]

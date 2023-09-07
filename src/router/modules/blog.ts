@@ -1,4 +1,3 @@
-
 const blogRouter = [
     {
         path: "/",
@@ -10,22 +9,32 @@ const blogRouter = [
         component: () => import("@/views/blog/manage/Index.vue"),
         children: [
             {
-                path:  '/administration',
+                path: '/administration',
                 name: '博客管理',
                 component: () => import("@/views/blog/manage/server/Administration.vue")
             },
             {
-                path:  '/category',
+                path: '/category',
                 name: '分类管理',
-                component: () => import("@/views/blog/manage/server/Category.vue")
+                component: () => import("@/views/blog/manage/server/category/Category.vue")
             },
             {
-                path:  '/special',
+                path: "/ct",
+                name: '分类类型',
+                component: () => import("@/views/blog/manage/server/category/Ct.vue")
+            },
+            {
+                path: '/special',
                 name: '专题管理',
                 component: () => import("@/views/blog/manage/server/Special.vue")
             },
             {
-                path:  '/userInformation',
+                path: '/status',
+                name: '状态管理',
+                component: () => import("@/views/blog/manage/server/Status.vue")
+            },
+            {
+                path: '/userInformation',
                 name: '个人信息',
                 component: () => import("@/views/blog/manage/server/UserInformation.vue")
             },
@@ -33,6 +42,11 @@ const blogRouter = [
                 path: '/member',
                 name: '博客成员',
                 component: () => import("@/views/blog/manage/server/Member.vue")
+            },
+            {
+                path: '/crb',
+                name: '分类回收',
+                component: () => import("@/views/blog/manage/server/recycle/Crb.vue")
             },
         ],
     },

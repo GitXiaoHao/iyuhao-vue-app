@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import Table from "@/components/Table.vue";
 import {onMounted, reactive, ref} from "vue";
-import {AdministrationSearchDataType, AdministrationTableDataType, BlogCategory, BlogStatus} from "@/types/blog";
 import {useBlogStore} from "@/store/modules/blog";
 import {getCategoryList} from "@/apis/blog/category";
 import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
 import Cover from "@/components/Cover.vue";
 import {getArticleByPage} from "@/apis/blog/article";
-import {getStatusList} from "@/apis/blog/status";
+import {getStatusListApi} from "@/apis/blog/status";
 import {DT} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
+import {AdministrationSearchDataType} from "@/types/blog/administration";
+import {BlogCategory} from "@/types/blog/category";
+import {BlogStatus} from "@/types/blog/status";
 //搜索部分
 const addBlogStr = ref("新增博客")
 const dialog = ref(false)
@@ -24,7 +26,7 @@ const selectCategoryList = async () => {
   }
 }
 const selectStatusList = async () => {
-  const res: any = await getStatusList()
+  const res: any = await getStatusListApi()
   if (res.code == 200) {
     blogStore.setStatusList(res.data)
   }
@@ -58,7 +60,7 @@ const tableOptions = reactive<OptionsType>({
   stripe: true,
   extHeight: 900,
   showIndex: false,
-  selectType: "checkbox"
+  selectType: null
 })
 //列表
 const columns = reactive<ColumnType[]>(
@@ -153,7 +155,9 @@ onMounted(() => {
           <div class="col-md-2">
             <el-form-item label="状态" prop="searchStatus">
               <el-select clearable placeholder="请选择状态" v-model="searchFormData.searchStatus">
-                <el-option :label="status.blogStatusName" :value="status.blogStatusName"
+                <el-option :label="status.blogStatusName"
+                           :disabled="status.blogStatusDisable == 1"
+                           :value="status.blogStatusName"
                            v-for="status in statusList"></el-option>
               </el-select>
             </el-form-item>

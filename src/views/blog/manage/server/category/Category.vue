@@ -55,11 +55,19 @@
         ></CoverUpload>
       </el-form-item>
       <el-form-item label="分类类型" prop="blogCategoryType">
-        <el-select v-model="categoryDialogForm.categoryDialogFormData.blogCategoryType" placeholder="分类类型">
-          <el-option label="Zone one" value="shanghai"/>
-          <el-option label="Zone two" value="beijing"/>
-        </el-select>
+        <el-autocomplete
+            v-model="categoryDialogForm.categoryDialogFormData.blogCategoryType"
+            :fetch-suggestions="categoryDialogForm.querySearch"
+            popper-class="my-autocomplete"
+            placeholder="请输入分类类型"
+            @select="handleSelect"
+        >
+          <template #default="{ item }">
+            <div class="value">{{ item.blogCategoryTypeName }}</div>
+          </template>
+        </el-autocomplete>
       </el-form-item>
+
       <el-form-item
           label="简介"
           prop="blogCategoryDesc">
@@ -82,12 +90,17 @@ import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
 import {addCategory, deleteCategory, getCategory} from "@/apis/blog/category";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
 import Cover from "@/components/Cover.vue";
-import { DialogType} from "@/types/dialog";
+import {DialogType} from "@/types/dialog";
 import Dialog from "@/components/Dialog.vue";
 import {FormInstance, FormRules} from "element-plus";
 import CoverUpload from "@/components/CoverUpload.vue";
 import {ButtonType, DT, globalInfo, MsgType} from "@/utils/constStr";
 import {BlogCategory} from "@/types/blog/category";
+import {getCategoryTypeListApi} from "@/apis/blog/categoryType";
+import {CategoryType} from "@/types/blog/categoryType";
+
+//分类类型
+const categoryTypeList = reactive<CategoryType[]>([])
 
 const columns = reactive<ColumnType[]>(
     [
@@ -133,9 +146,7 @@ const columns = reactive<ColumnType[]>(
 
 const tableData = reactive<DataSourceType<BlogCategory>>(
     {
-      records: [
-
-      ],
+      records: [],
       total: 1,
       size: 1,
       current: 1,
@@ -190,7 +201,7 @@ const categoryDialog = reactive<DialogType>({
       click: () => {
         //添加数据
         const url = coverUploadRef.value.dialogImageUrl
-        if(url){
+        if (url) {
           categoryDialogForm.categoryDialogFormData.blogCategoryCover = url
         }
         const res = categoryDialogForm.submitForm(categoryDialogForm.categoryDialogFormRuleFormRef.value)
@@ -208,29 +219,30 @@ const deleteDialogData = () => {
   showChangeDialog(false)
 }
 const showChangeDialog = (visible: boolean = false, dialogType?: DT, row?: BlogCategory) => {
-  nextTick(() => {
-    if (dialogType) {
-      if (dialogType == DT.update) {
-        categoryDialog.title = "修改分类"
-        categoryDialog.dialogType = DT.update
-        if (row) {
-          coverUploadFile.length = 0
-          coverUploadFile.push({
-            url: globalInfo.imageUrl + row.blogCategoryCover,
-            name: row.blogCategoryName
-          })
+  if (dialogType) {
+    if (dialogType == DT.update) {
+      categoryDialog.title = "修改分类"
+      categoryDialog.dialogType = DT.update
+      if (row) {
+        nextTick(() => {
+
           Object.assign(categoryDialogForm.categoryDialogFormData, row)
-        }
-      } else if (dialogType == DT.add) {
-        categoryDialog.title = "新增分类"
-        categoryDialog.dialogType = DT.add
+        })
+        coverUploadFile.length = 0
+        coverUploadFile.push({
+          url: globalInfo.imageUrl + row.blogCategoryCover,
+          name: row.blogCategoryName
+        })
       }
+    } else if (dialogType == DT.add) {
+      categoryDialog.title = "新增分类"
+      categoryDialog.dialogType = DT.add
     }
-    if (!visible) {
-      //清空
-      categoryDialogForm.resetForm(categoryDialogForm.categoryDialogFormRuleFormRef.value)
-    }
-  })
+  }
+  if (!visible) {
+    //清空
+    categoryDialogForm.resetForm(categoryDialogForm.categoryDialogFormRuleFormRef.value)
+  }
   categoryDialog.dialogVisible = visible
 }
 
@@ -256,16 +268,16 @@ const categoryDialogForm = {
   }),
   async submitForm(formEl: FormInstance | undefined) {
     if (!formEl) return false
-    await formEl.validate( async (valid) => {
+    await formEl.validate(async (valid) => {
       if (valid) {
         //添加
-        const res:any = await addCategory(this.categoryDialogFormData)
+        const res: any = await addCategory(this.categoryDialogFormData)
         if (res.code == 200) {
           appearMessage.success(res.data)
           coverUploadRef.value.dialogImageUrl = null
           deleteDialogData()
           await getTableData()
-        }else{
+        } else {
           appearMessage.error(res.message)
         }
         return true
@@ -279,23 +291,40 @@ const categoryDialogForm = {
     formEl.resetFields()
     coverUploadFile.length = 0
   },
+  querySearch(queryString: string, cb: any){
+    const results = queryString
+        ? categoryTypeList.filter(queryFilter(queryString))
+        : categoryTypeList
+    // call callback function to return suggestion objects
+    cb(results)
+  }
 }
-
-
-
+const handleSelect = (item: CategoryType) =>{
+  if (item.blogCategoryTypeName != null) {
+    categoryDialogForm.categoryDialogFormData.blogCategoryType = item.blogCategoryTypeName
+  }
+  console.log(item)
+}
+const queryFilter  = (queryString) =>{
+  return (restaurant: CategoryType) => {
+    return (
+        restaurant.blogCategoryTypeName?.toLowerCase().indexOf(queryString.toLowerCase()) != -1
+    )
+  }
+}
 /**
  * 删除数据
  * @param row
  */
-const deleteData =(row) => {
+const deleteData = (row) => {
   appearMessageBox("您确定删除吗?", "提示", MsgType.error, '确认', '取消')
       .then(async () => {
         //删除
-        const res:any = await deleteCategory(row)
-        if(res.code == 200) {
+        const res: any = await deleteCategory(row)
+        if (res.code == 200) {
           appearMessage.success(res.data)
           await getTableData()
-        }else{
+        } else {
           appearMessage.error(res.message)
         }
       })
@@ -303,11 +332,17 @@ const deleteData =(row) => {
         return
       })
 }
-
+const getCategoryTypeList = async () => {
+  const res:any = await getCategoryTypeListApi()
+  if(res.code == 200){
+    categoryTypeList.push(...res.data)
+  }
+}
 onMounted(() => {
   //获取数据
   getTableData()
-
+  //获取分类类型
+  getCategoryTypeList()
 })
 
 </script>

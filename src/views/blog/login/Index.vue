@@ -16,14 +16,14 @@
                 :rules="loginFormRule"
             >
               <el-form-item prop="userName">
-                <el-input v-model="loginForm.userName">
+                <el-input v-model="loginForm.userName" autofocus>
                   <template #prefix>
                     <span class="iconfont icon-user"></span>
                   </template>
                 </el-input>
               </el-form-item>
               <el-form-item prop="userPassword">
-                <el-input v-model="loginForm.userPassword" type="password">
+                <el-input v-model="loginForm.userPassword" type="password" show-password>
                   <template #prefix>
                     <span class="iconfont icon-password"></span>
                   </template>
@@ -44,7 +44,7 @@ import {UserInfo} from "@/types/user";
 import {FormInstance, FormRules} from "element-plus";
 import {loginApi} from "@/apis/blog/admin";
 import {appearMessage} from "@/utils/elementUtils";
-import {accessTokenStr} from "@/utils/constStr";
+import {accessInfoStr, accessTokenStr} from "@/utils/constStr";
 import {useUserStore} from "@/store/modules/user";
 import {useRouter} from "vue-router";
 
@@ -65,9 +65,11 @@ const login = async () :Promise<Boolean>=> {
     //如果成功
     const data = eval('(' + JSON.stringify(res.data) + ')')
     //管理员数据
-    const adminInfo = data["adminInfo"]
+    const adminInfo = data[accessInfoStr]
     //token
     const token = data[accessTokenStr]
+    console.log(data)
+    console.log(adminInfo)
     //存储
     userStore.setToken(token)
     //存放管理员信息

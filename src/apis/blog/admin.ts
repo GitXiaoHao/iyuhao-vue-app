@@ -13,3 +13,16 @@ export function loginApi(user: UserInfo){
         }
     })
 }
+
+
+export function saveUserInfoApi(user: UserInfo){
+    return httpInstance({
+        url: blogAdminPath + `admin`,
+        method: 'put',
+        data: {
+            ...user,
+            "showLoading": true
+        }
+    })
+}
+
