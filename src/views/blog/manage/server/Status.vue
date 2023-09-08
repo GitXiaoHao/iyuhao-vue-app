@@ -10,7 +10,7 @@
            :data-source="tableData"
            :fetch="loadDataList"
            :options="tableOptions"
-           :init-fetch="false"
+           :init-fetch="true"
            class="status-table"
     >
       <template #name="{index,row}">
@@ -151,8 +151,8 @@ const tableData = reactive<DataSourceType<BlogStatus>>(
       current: 1,
     }
 )
-const loadDataList = () => {
-
+const loadDataList = async (page:Number,pageSize?:Number) => {
+  await getTableData(page,pageSize)
 }
 const tableOptions = reactive<OptionsType>({
   border: false,

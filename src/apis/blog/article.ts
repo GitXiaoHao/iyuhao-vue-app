@@ -20,10 +20,10 @@ export function getArticleByPage(page: Number, pageSize: Number, params: Adminis
 
 export function getBlogApi(tags: Array<String>, formData: BlogArticleForm) {
     return httpInstance({
-        url: articlePath + `addBlog`,
-        method: 'put',
+        url: articlePath + `addArticle`,
+        method: 'post',
         data: {
-            tags,
+            'tags': tags,
             ...formData,
             "showLoading": true
         }

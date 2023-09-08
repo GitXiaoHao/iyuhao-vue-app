@@ -12,6 +12,7 @@ import {useRouter} from "vue-router";
 
 
 let loading = null
+const router = useRouter()
 const userStore = useUserStore()
 // axios.defaults.withCredentials = true
 const httpInstance = axios.create({
@@ -71,7 +72,6 @@ httpInstance.interceptors.response.use(function (response) {
         userStore.setToken('')
         appearMessage.error("登陆超时")
         setTimeout(() => {
-            const router = useRouter()
             router.push("/login").then(r => {})
         },1000)
         return Promise.reject("登录超时")

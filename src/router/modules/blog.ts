@@ -14,6 +14,11 @@ const blogRouter = [
                 component: () => import("@/views/blog/manage/server/Administration.vue")
             },
             {
+                path: '/at',
+                name: '标签管理',
+                component: () => import("@/views/blog/manage/server/article/ArticleTag.vue")
+            },
+            {
                 path: '/category',
                 name: '分类管理',
                 component: () => import("@/views/blog/manage/server/category/Category.vue")

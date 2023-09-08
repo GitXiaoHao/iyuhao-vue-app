@@ -9,7 +9,7 @@ import {getArticleByPage} from "@/apis/blog/article";
 import {getStatusListApi} from "@/apis/blog/status";
 import {DT} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
-import {AdministrationSearchDataType} from "@/types/blog/administration";
+import {AdministrationSearchDataType, AdministrationTableDataType} from "@/types/blog/administration";
 import {BlogCategory} from "@/types/blog/category";
 import {BlogStatus} from "@/types/blog/status";
 //搜索部分
@@ -48,12 +48,12 @@ const tableData = reactive<DataSourceType<AdministrationTableDataType>>({
   records: [
     {}
   ],
-  total: 1,
-  size: 1,
+  total: 0,
+  size: 0,
   current: 1,
 })
-const loadDataList = () => {
-
+const loadDataList = async (page:Number,pageSize?:Number) => {
+  await selectBlogListByPage(page, pageSize)
 }
 const tableOptions = reactive<OptionsType>({
   border: false,
@@ -184,7 +184,7 @@ onMounted(() => {
            :data-source="tableData"
            :fetch="loadDataList"
            :options="tableOptions"
-           :init-fetch="false"
+           :init-fetch="true"
            class="admin-table"
     >
       <template #cover="{index,row}">
@@ -228,11 +228,12 @@ onMounted(() => {
         <el-button type="primary" @click="">预览</el-button>
       </template>
     </Table>
+
     <UpdateBlog :title="addBlogStr"
              v-if="dialog"
              @closeDrawer="closeDrawer"
              :type="DT.add"
-                @selectBlogListByPage="selectBlogListByPage"
+             @selectBlogListByPage="selectBlogListByPage"
     ></UpdateBlog>
   </div>
 </template>

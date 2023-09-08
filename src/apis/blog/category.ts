@@ -23,10 +23,21 @@ export function getCategoryList() {
     })
 }
 
-export function addCategory(category:BlogCategory){
+export function addCategoryApi(category:BlogCategory){
     return httpInstance({
-        url: blogPath + 'category',
+        url: blogPath + 'add',
         method: 'post',
+        data: {
+            ...category,
+            "showLoading": true
+        }
+    })
+}
+
+export function updateCategoryApi(category:BlogCategory){
+    return httpInstance({
+        url: blogPath + 'update',
+        method: 'put',
         data: {
             ...category,
             "showLoading": true

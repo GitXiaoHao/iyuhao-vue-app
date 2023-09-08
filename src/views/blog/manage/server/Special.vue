@@ -205,8 +205,8 @@ const columns = reactive<ColumnType[]>(
 const tableData = reactive<DataSourceType<BlogSpecial>>(
     {
       records: [],
-      total: 1,
-      size: 1,
+      total: 0,
+      size: 0,
       current: 1,
     }
 )
@@ -440,10 +440,6 @@ const treeProps = {
   children: 'children',
   label: 'title',
   value: 'blogId',
-}
-//树拖拽排序
-const blogDrag = () => {
-
 }
 let id = 1000
 const append = (data) => {

@@ -10,7 +10,7 @@
            :data-source="tableData"
            :fetch="loadDataList"
            :options="tableOptions"
-           :init-fetch="false"
+           :init-fetch="true"
            class="table"
     >
       <template #disabled="{index,row}">
@@ -146,8 +146,8 @@ const tableData = reactive<DataSourceType<CategoryType>>(
       current: 1,
     }
 )
-const loadDataList = () => {
-
+const loadDataList = async (page:Number,pageSize?:Number) => {
+  await getTableData(page,pageSize)
 }
 const tableOptions = reactive<OptionsType>({
   border: false,

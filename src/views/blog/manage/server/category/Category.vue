@@ -87,7 +87,7 @@
 import Table from "@/components/Table.vue";
 import {nextTick, onMounted, reactive, ref} from "vue";
 import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
-import {addCategory, deleteCategory, getCategory} from "@/apis/blog/category";
+import {addCategoryApi, deleteCategory, getCategory, updateCategoryApi} from "@/apis/blog/category";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
 import Cover from "@/components/Cover.vue";
 import {DialogType} from "@/types/dialog";
@@ -278,7 +278,12 @@ const categoryDialogForm = {
     await formEl.validate(async (valid) => {
       if (valid) {
         //添加
-        const res: any = await addCategory(this.categoryDialogFormData)
+        let res
+        if(categoryDialog.dialogType == DT.add){
+          res = await addCategoryApi(this.categoryDialogFormData)
+        }else if(categoryDialog.dialogType == DT.update){
+          res = await updateCategoryApi(this.categoryDialogFormData)
+        }
         if (res.code == 200) {
           appearMessage.success(res.data)
           coverUploadRef.value.dialogImageUrl = null

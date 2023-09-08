@@ -61,11 +61,11 @@
                   @change="currentTagChange"
                   placeholder="+添加文章标签">
                 <el-option
-                    v-for="(item,index) in articleTags"
+                    v-for="(item,index) in articleTagsByList"
                     :key="index"
-                    :label="item.value"
-                    :value="item.value"
-                    :disabled="item.disabled"
+                    :label="item.articleTagName"
+                    :value="item.articleTagName"
+                    :disabled="item.articleTagDisable == 1"
                 />
               </el-select>
             </el-form-item>
@@ -164,6 +164,8 @@ import {Bottom, Top} from "@element-plus/icons-vue";
 import {getBlogApi} from "@/apis/blog/article";
 import {BlogCategory} from "@/types/blog/category";
 import {ArticleType, BlogArticleForm} from "@/types/blog/article";
+import {ArticleTag,ArticleTagListByPage} from "@/types/blog/articleTag";
+import {getArticleTagListApi, getArticleTagListByTreeApi} from "@/apis/blog/articleTag";
 
 const emits = defineEmits(['closeDrawer', 'selectBlogListByPage'])
 const props = defineProps({
@@ -297,16 +299,16 @@ const getBlog = async () => {
     settingForm.blogArticleEditorType = editorStr.value
     //提交
     const tags = settingForm.articleTags
-    delete settingForm['articleTags']
     const res: any = await getBlogApi(tags, settingForm)
     if (res.code == 200) {
       //提交成功
-      appearMessage.success('发布成功')
+      appearMessage.success('保存成功')
+      delete settingForm['articleTags']
       setTimeout(() => {
         //跳转
+        emits('closeDrawer')
       }, 2000)
       emits('selectBlogListByPage')
-      coverUploadRef.value.dialogImageUrl = null
       //清空
       deleteSettingForm()
     } else {
@@ -316,7 +318,6 @@ const getBlog = async () => {
 }
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
   await formEl.validate((valid, fields) => {
     if (valid) {
       console.log(settingForm)
@@ -332,15 +333,18 @@ const deleteSettingForm = () => {
   coverUploadRef.value.deletePic()
   //删除所有
   settingFormRef.value?.resetFields()
+
 }
 const submitDraft = () => {
+  settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
   settingForm.blogStatusName = "草稿"
-  submitForm(settingFormRef.value)
+  getBlog()
 }
 /**
  * 发布博客
  */
 const postABlog = () => {
+  settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
   settingForm.blogStatusName = "已发布"
   submitForm(settingFormRef.value)
 }
@@ -362,20 +366,8 @@ const validateBlogTitle = (): Boolean => {
 }
 //标签
 const currentTag = ref("")
-const articleTags = reactive([
-  {
-    value: "12",
-    disabled: true
-  }, {
-    value: "11s",
-    disabled: false
-  },
-  {
-    value: "13",
-    disabled: false
-  }
-])
-
+const articleTagsByTree = reactive<ArticleTagListByPage[]>([])
+const articleTagsByList = reactive<ArticleTag[]>([])
 /***
  * 当选择了一个标签的时候
  * @param value
@@ -384,9 +376,9 @@ const currentTagChange = (value) => {
   settingForm.articleTags?.push(value)
   currentTag.value = ""
   //设置为disable
-  articleTags.forEach(tag => {
-    if (tag.value == value) {
-      tag.disabled = true
+  articleTagsByList.forEach(tag => {
+    if (tag.articleTagName == value) {
+      tag.articleTagDisable = 1
     }
   })
 }
@@ -395,9 +387,9 @@ const currentTagChange = (value) => {
  * @param value
  */
 const handleCloseTag = (value: string) => {
-  articleTags.forEach(tag => {
-    if (tag.value == value) {
-      tag.disabled = false
+  articleTagsByList.forEach(tag => {
+    if (tag.articleTagName == value) {
+      tag.articleTagDisable = 0
     }
   })
   settingForm.articleTags.splice(settingForm.articleTags.indexOf(value), 1)
@@ -422,18 +414,33 @@ const checkPosition = () => {
   go(str)
   checkPositionBool.value = !checkPositionBool.value
 }
-
-
+const getArticleTagData = async () => {
+  const res: any = await getArticleTagListByTreeApi()
+  if(res.code == 200){
+    articleTagsByTree.length = 0
+    articleTagsByTree.push(...res.data)
+  }
+  const res2: any = await getArticleTagListApi()
+  if(res2.code == 200){
+    articleTagsByList.length = 0
+    articleTagsByList.push(...res2.data)
+  }
+}
+const updateFormData = () => {
+  //修改
+  Object.assign(props.blogArticleData, settingForm)
+  mdTest.value = settingForm.blogArticleMarkdownContent
+  coverUploadFile.push({
+    url: globalInfo.imageUrl + settingForm.blogArticleCover,
+    name: settingForm.blogArticleTitle
+  })
+}
 onMounted(() => {
   if (props.type == DT.update) {
-    //修改
-    Object.assign(props.blogArticleData, settingForm)
-    mdTest.value = settingForm.blogArticleMarkdownContent
-    coverUploadFile.push({
-      url: globalInfo.imageUrl + settingForm.blogArticleCover,
-      name: settingForm.blogArticleTitle
-    })
+     updateFormData()
   }
+  //标签getArticleTagByTreeData()
+  getArticleTagData()
 })
 </script>
 

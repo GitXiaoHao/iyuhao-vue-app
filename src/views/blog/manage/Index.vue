@@ -9,12 +9,15 @@
           <el-dropdown type="primary" @command="handleCommand">
             <span class="el-dropdown-link">
               <span class="link-name">欢迎回来，{{ userInfo.userName }}</span>
-              <el-icon><ArrowDown /></el-icon>
+              <el-icon><ArrowDown/></el-icon>
             </span>
 
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item :command="userMenu.information" :icon="InfoFilled">{{ userMenu.information }}</el-dropdown-item>
+                <el-dropdown-item :command="userMenu.information" :icon="InfoFilled">{{
+                    userMenu.information
+                  }}
+                </el-dropdown-item>
                 <el-dropdown-item :command="userMenu.exit" :icon="Delete">{{ userMenu.exit }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -49,13 +52,14 @@
                   <span :class="'iconfont ' + menuItem.icon" class="sub-icon"></span>
                   <span class="sub-title">{{ menuItem.title }}</span>
                 </template>
-                <el-menu-item-group >
+                <el-menu-item-group>
                   <el-menu-item :index="menuChildrenItem.id"
                                 v-for="(menuChildrenItem) in menuItem.children"
                                 :disabled="menuChildrenItem.disabled || false">
                     <RouterLink class="sub-menu-link"
                                 :to="menuChildrenItem.path"
-                    >{{ menuChildrenItem.title }}</RouterLink>
+                    >{{ menuChildrenItem.title }}
+                    </RouterLink>
                   </el-menu-item>
                 </el-menu-item-group>
               </el-sub-menu>
@@ -63,7 +67,14 @@
           </div>
         </el-aside>
         <el-main class="right-main">
-            <RouterView/>
+          <RouterView/>
+          <div class="right-bottom">
+            <div style="width:300px;margin:0 0; padding:20px 0;" class="bottom-beian">
+              <img src="@/assets/image/beian.png" alt="">
+              <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=42030402000172" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">鄂公网安备 42030402000172号</p></a>
+            </div>
+            <a href="https://beian.miit.gov.cn/" target="_blank" class="bottom-a">鄂ICP备2023011277号-1</a>
+          </div>
         </el-main>
       </el-container>
     </el-container>
@@ -102,7 +113,12 @@ const menuList = reactive([
         disabled: false,
         path: '/administration',
       },
-
+      {
+        id: '1232',
+        title: '标签管理',
+        disabled: false,
+        path: '/at',
+      },
     ],
   },
   {
@@ -189,7 +205,7 @@ const menuList = reactive([
     ]
   }
 ])
-const exit =() => {
+const exit = () => {
   userStore.setUserInfo({})
   userStore.setToken('')
   //跳转登录页
@@ -199,9 +215,9 @@ const exit =() => {
 
 const handleCommand = (command: string | number | object | userMenu) => {
   //点击下拉菜单
-  if(command == userMenu.information){
+  if (command == userMenu.information) {
     router.push('/userInformation')
-  }else if(command == userMenu.exit){
+  } else if (command == userMenu.exit) {
     //退出
     exit()
   }
@@ -214,10 +230,9 @@ const handleClose = (key: string, keyPath: string[]) => {
 }
 
 
-
-watch(route,(newValue: any,oldValue: any) => {
+watch(route, (newValue: any, oldValue: any) => {
   activePath.value = newValue.path
-},{immediate:true,deep: true})
+}, {immediate: true, deep: true})
 
 
 onBeforeMount(() => {
@@ -225,7 +240,7 @@ onBeforeMount(() => {
 })
 onMounted(async () => {
   //获取用户信息
-  Object.assign(userInfo,userStore.getUserInfo)
+  Object.assign(userInfo, userStore.getUserInfo)
   activePath.value = menuList[0].children[0].path
   loading.value = false
 })
@@ -242,20 +257,24 @@ onMounted(async () => {
     .header-logo {
       font-size: 30px;
     }
-    .header-user-info{
+
+    .header-user-info {
 
       display: flex;
+
       .el-dropdown-link {
         font-size: 18px;
         display: flex;
         align-items: center;
         cursor: pointer;
         color: var(--el-color-primary);
+
         .link-name {
           margin-right: 8px;
         }
       }
-      .avatar{
+
+      .avatar {
         width: 60px;
         margin: 8px;
       }
@@ -291,12 +310,14 @@ onMounted(async () => {
           .sub-title {
 
           }
-          .sub-menu-link{
+
+          .sub-menu-link {
             text-decoration: none;
             color: white;
             font-size: 15px;
           }
-          .link-active{
+
+          .link-active {
             color: #ffd04b;
           }
         }
@@ -306,13 +327,39 @@ onMounted(async () => {
 
     .right-main {
       background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      .right-bottom{
+        margin-top: 100px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        //bottom: 10px;
+        .bottom-beian{
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+        .bottom-a{
+          border: none !important;
+          display: flex;
+          color: black !important;
+          text-decoration:none;
+        }
+        a:hover{
+          color: #3271ae !important;
+        }
+      }
     }
   }
 }
-.is-active{
+
+.is-active {
 
 }
-.active{
+
+.active {
   color: #f6e58d !important;
 }
 </style>
