@@ -10,7 +10,7 @@
            :data-source="tableData"
            :fetch="loadDataList"
            :options="tableOptions"
-           :init-fetch="false"
+           :init-fetch="true"
            class="category-table"
     >
       <template #cover="{index,row}">
@@ -127,6 +127,13 @@ const columns = reactive<ColumnType[]>(
         scopedSlots: false
       },
       {
+        label: '分类类型',
+        prop: 'blogCategoryType',
+        align: 'left',
+        width: 150,
+        scopedSlots: false
+      },
+      {
         label: '博客数量',
         prop: 'blogCategoryEssayCount',
         width: 100,
@@ -152,8 +159,8 @@ const tableData = reactive<DataSourceType<BlogCategory>>(
       current: 1,
     }
 )
-const loadDataList = () => {
-
+const loadDataList = async (page:Number,pageSize?:Number) => {
+  await getTableData(page,pageSize)
 }
 const tableOptions = reactive<OptionsType>({
   border: false,
@@ -290,6 +297,7 @@ const categoryDialogForm = {
     if (!formEl) return
     formEl.resetFields()
     coverUploadFile.length = 0
+    Object.keys(categoryDialogForm.categoryDialogFormData).forEach(key => categoryDialogForm.categoryDialogFormData[key] = null)
   },
   querySearch(queryString: string, cb: any){
     const results = queryString

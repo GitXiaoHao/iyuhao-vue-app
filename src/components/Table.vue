@@ -64,12 +64,11 @@
 
       <el-pagination v-if="dataSource.total"
                      background
-                     hide-on-single-page
                      :total="dataSource.total"
-                     :page-sizes="[15,30,50,100]"
+                     :page-sizes="[5,10,15,20,50]"
                      :page-size="dataSource.size"
                      :current-page.sync="dataSource.current"
-                     layout="total,size,prev,pager,next,jumper"
+                     layout="total,sizes,prev,pager,next,jumper"
                      @size-change="handlePageSizeChange"
                      @current-change="handlePageChange"
                      @next-click="nextClick"
@@ -112,27 +111,23 @@ const handleSelectionChange = (row) => {
 
 // 切换每页大小
 const handlePageSizeChange = (size) => {
-  // props.dataSource.pageSize = size
-  // props.dataSource.pageNo = 1
-  console.log(size)
   if (props.initFetch && props.fetch) {
-    props.fetch()
+    props.fetch(1,size)
   }
 }
 
 //切换页码
 const handlePageChange = (pageNo) => {
   // props.dataSource.pageNo = pageNo
-  console.log(pageNo)
   if (props.initFetch && props.fetch) {
-    props.fetch()
+    props.fetch(pageNo)
   }
 }
 const nextClick = (page) => {
-  console.log(page)
+
 }
 const prevClick = (page) => {
-  console.log(page)
+
 }
 //设置行选中
 const setCurrentRow = (rowKey, rowValue?) => {

@@ -68,8 +68,6 @@ const login = async () :Promise<Boolean>=> {
     const adminInfo = data[accessInfoStr]
     //token
     const token = data[accessTokenStr]
-    console.log(data)
-    console.log(adminInfo)
     //存储
     userStore.setToken(token)
     //存放管理员信息
