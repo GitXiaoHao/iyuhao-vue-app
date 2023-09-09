@@ -16,6 +16,8 @@ export interface AdministrationTableDataType {
     blogArticleContent?: String
     blogArticleMarkdownContent?: String
     blogArticleEditorType?: String
+    blogSpecialId?: String
+    blogSpecialName?: String
     userId?: String
     userName?: String
     blogArticleType?: String

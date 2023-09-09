@@ -171,7 +171,7 @@ const menuList = reactive([
       {
         id: '1243',
         title: '标签管理',
-        path: '/label',
+        path: '/at',
       },
     ],
   },
@@ -241,7 +241,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 }
 
 
-watch(route, (newValue: any, oldValue: any) => {
+watch(route, (newValue: any) => {
   activePath.value = newValue.path
   activeTitle.value = newValue.meta.title
 }, {immediate: true, deep: true})

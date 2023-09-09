@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Table from "@/components/Table.vue";
-import {nextTick, onMounted, reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {useBlogStore} from "@/store/modules/blog";
 import {getCategoryList} from "@/apis/blog/category";
 import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
@@ -11,9 +11,10 @@ import {DT, MsgType} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
 import {AdministrationSearchDataType, AdministrationTableDataType} from "@/types/blog/administration";
 import {BlogCategory} from "@/types/blog/category";
-import {ArticleStatusType, BlogArticleForm} from "@/types/blog/article";
+import {BlogArticleForm} from "@/types/blog/article";
 import {BlogStatus} from "@/types/blog/status";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
+import {getSpecialListApi} from "@/apis/blog/special";
 //搜索部分
 const addBlogStr = ref("新增博客")
 const dialog = ref(false)
@@ -29,15 +30,21 @@ const selectCategoryList = async () => {
     blogStore.setCategoryList(res.data)
   }
 }
+const selectSpecialList = async () => {
+  const res: any = await getSpecialListApi()
+  if (res.code == 200) {
+    blogStore.setSpecialList(res.data)
+  }
+}
 const selectStatusList = async () => {
   const res: any = await getStatusListApi()
   if (res.code == 200) {
     blogStore.setStatusList(res.data)
   }
 }
-const selectBlogListByPage = async (page:Number = 1, pageSize:Number = 5) => {
-  const res: any = await getArticleByPage(page,pageSize,searchFormData)
-  if(res.code == 200) {
+const selectBlogListByPage = async (page: Number = 1, pageSize: Number = 5) => {
+  const res: any = await getArticleByPage(page, pageSize, searchFormData)
+  if (res.code == 200) {
     Object.assign(tableData, res.data)
   }
 }
@@ -57,7 +64,7 @@ const tableData = reactive<DataSourceType<AdministrationTableDataType>>({
   size: 0,
   current: 1,
 })
-const loadDataList = async (page:Number,pageSize?:Number) => {
+const loadDataList = async (page: Number, pageSize?: Number) => {
   await selectBlogListByPage(page, pageSize)
 }
 const tableOptions = reactive<OptionsType>({
@@ -97,6 +104,13 @@ const columns = reactive<ColumnType[]>(
         width: 300,
         align: 'center',
         scopedSlots: 'typeName'
+      },
+      {
+        label: '专题',
+        prop: 'blogSpecialName',
+        width: 120,
+        align: 'center',
+        scopedSlots: false
       },
       {
         label: '评论',
@@ -144,26 +158,28 @@ const closeDrawer = () => {
 const updateArticle = (blogArticle) => {
   dialogType.value = DT.update
   // Object.keys(blogArticleData).forEach(key => blogArticleData[key] = null)
-  Object.assign(blogArticleData,blogArticle)
+  Object.assign(blogArticleData, blogArticle)
   dialog.value = true
 }
 const deleteArticle = async (blogArticle) => {
-  appearMessageBox("您确定要删除吗？","提示",MsgType.error)
-      .then(async r => {
+  appearMessageBox("您确定要删除吗？", "提示", MsgType.error)
+      .then(async () => {
         //删除
         const res: any = await deleteArticleApi(blogArticle)
-        if(res.code == 200){
+        if (res.code == 200) {
           appearMessage.success("删除成功")
           await selectBlogListByPage()
-        }else{
+        } else {
           appearMessage.error("删除失败")
         }
-      }).catch(r => {
-        return
+      }).catch(() => {
+    return
   })
 }
 
 onMounted(() => {
+  //博客专题
+  selectSpecialList()
   //博客状态
   selectStatusList()
   //分类类型
@@ -210,7 +226,7 @@ onMounted(() => {
             <el-button type="primary" @click="search">搜索</el-button>
           </div>
           <div class="col-md-2 offset-md-2 offset-sm-2">
-            <el-button type="primary" @click="addBlog">{{addBlogStr}}</el-button>
+            <el-button type="primary" @click="addBlog">{{ addBlogStr }}</el-button>
           </div>
         </div>
       </el-form>
@@ -228,42 +244,43 @@ onMounted(() => {
           <Cover :cover="row.blogArticleCover"></Cover>
         </div>
       </template>
-<!--      文章信息-->
+      <!--      文章信息-->
       <template #blogInfo="{index,row}">
         <div class="col">
-          <div>标题：{{row.blogArticleTitle}}</div>
-          <div>分类：{{row.blogCategoryName}}</div>
-          <div>作者：{{row.userName}}</div>
+          <div>标题：{{ row.blogArticleTitle }}</div>
+          <div>分类：{{ row.blogCategoryName }}</div>
+          <div>作者：{{ row.userName }}</div>
         </div>
       </template>
-<!--      文章类型-->
+      <!--      文章类型-->
       <template #typeName="{index,row}">
         <div class="col">
-          <div>类型：{{row.blogArticleType}}</div>
-          <div v-if="row.blogArticleType">转载地址：<a :href="row.blogArticleReprintUrl">{{row.blogArticleReprintUrl}}</a></div>
+          <div>类型：{{ row.blogArticleType }}</div>
+          <div v-if="row.blogArticleType">转载地址：<a
+              :href="row.blogArticleReprintUrl">{{ row.blogArticleReprintUrl }}</a></div>
         </div>
       </template>
       <template #status="{index,row}">
         <template v-for="item in statusList">
           <div v-if="item.blogStatusName == row.blogStatusName"
-              :style="{'color': item.blogStatusColor}"
+               :style="{'color': item.blogStatusColor}"
           >
-            {{row.blogStatusName}}
+            {{ row.blogStatusName }}
           </div>
         </template>
       </template>
-<!--      文章评论-->
+      <!--      文章评论-->
       <template #comment="{index,row}">
         <div class="col">
-          <div>{{row.blogArticleAllowComment === 1 ? "允许" : "禁止"}}</div>
+          <div>{{ row.blogArticleAllowComment === 1 ? "允许" : "禁止" }}</div>
         </div>
       </template>
 
-<!--      文章时间-->
+      <!--      文章时间-->
       <template #time="{index,row}">
         <div class="col">
-          <div>创建时间：{{row.blogArticleAddTime}}</div>
-          <div>更新时间：{{row.blogArticleUpdateTime}}</div>
+          <div>创建时间：{{ row.blogArticleAddTime }}</div>
+          <div>更新时间：{{ row.blogArticleUpdateTime }}</div>
         </div>
       </template>
       <template #op="{index,row}">
@@ -276,23 +293,24 @@ onMounted(() => {
     </Table>
 
     <UpdateBlog :title="addBlogStr"
-             v-if="dialog"
-             @closeDrawer="closeDrawer"
-             :type="dialogType"
+                v-if="dialog"
+                @closeDrawer="closeDrawer"
+                :type="dialogType"
                 :blogArticleData="blogArticleData"
-             @selectBlogListByPage="selectBlogListByPage"
+                @selectBlogListByPage="selectBlogListByPage"
     ></UpdateBlog>
   </div>
 </template>
 
 
 <style lang="scss">
-.admin-body{
-  .admin-table{
+.admin-body {
+  .admin-table {
     width: 100%;
     height: 100%;
   }
-  .window{
+
+  .window {
 
   }
 }

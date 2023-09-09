@@ -77,7 +77,7 @@ httpInstance.interceptors.response.use(function (response) {
                 const router = useRouter()
                 router.push("/login").then(r => {
                 })
-                // window.location.replace("https://www.runoob.com");
+                window.location.replace("/login");
              }).then(r =>{})
         },1000)
         return Promise.reject("登录超时")

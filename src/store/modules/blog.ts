@@ -3,6 +3,7 @@ import {defineStore} from "pinia";
 import {UserInfo} from "@/types/user";
 import {BlogCategory} from "@/types/blog/category";
 import {BlogStatus} from "@/types/blog/status";
+import {BlogSpecial} from "@/types/blog/special";
 
 
 /**
@@ -11,7 +12,8 @@ import {BlogStatus} from "@/types/blog/status";
 interface BlogStoreState {
     //分类集合
     categoryList: BlogCategory[],
-    statusList: Array<BlogStatus>
+    statusList: Array<BlogStatus>,
+    specialList: Array<BlogSpecial>
 }
 
 
@@ -20,6 +22,7 @@ export const useBlogStore = defineStore({
     state: (): BlogStoreState => ({
         categoryList: [],
         statusList: [],
+        specialList: [],
     }),
     getters: {
         getCategoryList(): Array<BlogCategory> {
@@ -27,6 +30,9 @@ export const useBlogStore = defineStore({
         },
         getStatusList(): Array<BlogStatus> {
             return this.statusList
+        } ,
+        getSpecialList(): Array<BlogSpecial> {
+            return this.specialList
         }
     },
     actions: {
@@ -40,6 +46,12 @@ export const useBlogStore = defineStore({
             if (statusList) {
                 this.statusList.length = 0
                 Object.assign(this.statusList, statusList)
+            }
+        },
+        setSpecialList(specialList: BlogSpecial[]) {
+            if (specialList) {
+                this.specialList.length = 0
+                Object.assign(this.specialList, specialList)
             }
         }
     }

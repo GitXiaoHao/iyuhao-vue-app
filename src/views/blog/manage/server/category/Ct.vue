@@ -231,13 +231,17 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       let res
       let info = userStore.getUserInfo
       if (ctDialog.dialogType == DT.add) {
-        ctDialogFormData.blogCategoryCreateUserId = info.userId
-        ctDialogFormData.blogCategoryCreateUserName = info.userName
+        if(info.userId && info.userName){
+          ctDialogFormData.blogCategoryCreateUserId = info.userId
+          ctDialogFormData.blogCategoryCreateUserName = info.userName
+        }
         res = await addCategoryTypeApi(ctDialogFormData)
       } else if (ctDialog.dialogType == DT.update) {
         //修改
-        ctDialogFormData.blogCategoryLastUpdateUserId = info.userId
-        ctDialogFormData.blogCategoryLastUpdateUserName = info.userName
+        if(info.userId && info.userName) {
+          ctDialogFormData.blogCategoryLastUpdateUserId = info.userId
+          ctDialogFormData.blogCategoryLastUpdateUserName = info.userName
+        }
         res = await updateCategoryTypeApi(ctDialogFormData)
       }
       if (res.code == 200) {

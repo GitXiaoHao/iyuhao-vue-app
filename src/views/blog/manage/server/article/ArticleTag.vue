@@ -3,7 +3,7 @@
     <!-- HTML !-->
     <button class="button-28" role="button"
             @click="showChangeDialog(true,DT.add)"
-    >新增专题
+    >新增标签
     </button>
     <div class="main row">
       <div class="col-lg-7">
@@ -17,7 +17,6 @@
                  :options="tableOptions"
                  :init-fetch="false"
                  class="table"
-                 @rowClick="rowClick"
           >
             <template #topLevel="{index,row}">
               <div v-if="row.articleTagParentId">否</div>
@@ -378,18 +377,7 @@ const deleteData = (row) => {
 
 
 const parentChange = (value) => {
-  console.log(value)
   articleTagDialogFormData.articleTagParentName = value
-}
-//专题文章树
-const blogSpecialArticleList = reactive([])
-const rowClick = (row) => {
-  //行点击
-
-}
-//获取专题文章
-const loadBlogSpecialArticleList = () => {
-
 }
 
 
@@ -404,8 +392,6 @@ const append = (data) => {
 
 
 const dataSourceTree = reactive<ArticleTagListByPage[]>([])
-
-
 onMounted(() => {
   //获取数据
   getData()

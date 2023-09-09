@@ -1,3 +1,5 @@
+import {BlogSpecial} from "@/types/blog/special";
+
 export enum ArticleType {
     original = "原创",
     reprint = "转载"
@@ -20,6 +22,8 @@ export interface BlogArticleForm {
     blogArticleType?: ArticleType | null
     blogArticleAllowComment?: Number
     blogArticleEditorType?: String
+    blogSpecialId?: String
+    blogSpecialName?: String
     blogArticleReprintUrl?: String
     blogStatusName?: String
     userId?: String
@@ -30,3 +34,8 @@ export interface BlogArticleForm {
     blogArticleAddTime?:String
     blogArticleUpdateTime?:String
 }
+
+
+
+
+

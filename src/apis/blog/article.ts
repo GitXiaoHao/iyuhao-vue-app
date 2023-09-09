@@ -63,3 +63,14 @@ export function getArticleTag4relationshipApi(id:String){
         }
     })
 }
+
+
+export function getArticle4SpecialApi(id:String){
+    return httpInstance({
+        url: articlePath + `special/${id}`,
+        method: 'get',
+        data: {
+            "showLoading": true
+        }
+    })
+}

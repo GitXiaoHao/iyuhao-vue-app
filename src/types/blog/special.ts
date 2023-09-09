@@ -1,3 +1,5 @@
+import {ArticleTag} from "@/types/blog/articleTag";
+
 /**
  * 博客专题
  */
@@ -38,6 +40,7 @@ export interface BlogSpecial{
      * 博客专题最后一次修改人id
      */
     blogSpecialLastUpdateUserId?:String
+    blogSpecialLastUpdateUserName?:String
 
     /**
      * 点赞次数
@@ -69,3 +72,6 @@ export interface BlogSpecial{
      */
     blogSpecialUpdateTime?:String
 }
+
+
+

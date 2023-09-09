@@ -15,7 +15,7 @@
                  :data-source="tableData"
                  :fetch="loadDataList"
                  :options="tableOptions"
-                 :init-fetch="false"
+                 :init-fetch="true"
                  class="special-table"
                  @rowClick="rowClick"
           >
@@ -40,7 +40,7 @@
         >
           <el-empty description="点击行进行查看"
                     :image-size="100"
-                    v-if="!dataSource.length"
+                    v-if="!blogArticleListByTree.length"
           />
           <div class="special-blog-tree" v-else>
             <div class="tree-title">
@@ -52,22 +52,20 @@
               </a>
             </div>
             <el-tree
-                :data="dataSource"
+                :data="blogArticleListByTree"
                 node-key="id"
                 default-expand-all
                 :expand-on-click-node="false"
             >
               <template #default="{node,data}">
                 <span class="custom-tree-node">
-                    <span>{{ node.label }}</span>
+                    <span>{{ node.blogArticle.blogArticleTitle }}</span>
                     <span class="node-button">
-                      <a @click="remove(node, data)"> 预览 </a>
+                      <a @click="remove(data)">预览</a>
                       <el-divider direction="vertical"></el-divider>
-                      <a @click="remove(node, data)">修改</a>
+                      <a @click="remove(data)">修改</a>
                       <el-divider direction="vertical"></el-divider>
-                      <a @click="remove(node, data)">删除</a>
-                      <el-divider direction="vertical"></el-divider>
-                      <a @click="append(data)">新增下级文章</a>
+                      <a @click="remove(data)">删除</a>
                     </span>
                 </span>
               </template>
@@ -123,11 +121,11 @@
             @change="currentTagChange"
             placeholder="+添加专题标签">
           <el-option
-              v-for="(item,index) in articleTags"
+              v-for="(item,index) in articleTagsByList"
               :key="index"
-              :label="item.value"
-              :value="item.value"
-              :disabled="item.disabled"
+              :label="item.articleTagName"
+              :value="item.articleTagName"
+              :disabled="item.articleTagDisable == 1"
           />
         </el-select>
       </el-form-item>
@@ -160,7 +158,13 @@ import CoverUpload from "@/components/CoverUpload.vue";
 import {ButtonType, DT, globalInfo, MsgType} from "@/utils/constStr";
 import {deleteSpecialApi, getSpecialListByPageApi, updateSpecialApi} from "@/apis/blog/special";
 import {BlogSpecial} from "@/types/blog/special";
+import {ArticleTag} from "@/types/blog/articleTag";
+import {getArticleTagListApi} from "@/apis/blog/articleTag";
+import {useUserStore} from "@/store/modules/user";
+import {BlogArticleForm} from "@/types/blog/article";
+import {getArticle4SpecialApi} from "@/apis/blog/article";
 
+const userStore = useUserStore()
 const columns = reactive<ColumnType[]>(
     [
       {
@@ -210,8 +214,8 @@ const tableData = reactive<DataSourceType<BlogSpecial>>(
       current: 1,
     }
 )
-const loadDataList = () => {
-
+const loadDataList = (page:Number, pageSize:Number) => {
+  getTableData(page,pageSize)
 }
 const tableOptions = reactive<OptionsType>({
   border: false,
@@ -263,7 +267,6 @@ const specialDialog = reactive<DialogType>({
           specialDialogFormData.blogSpecialCover = url
         }
         submitForm(specialDialogFormRuleFormRef.value)
-
       }
     },
   ],
@@ -277,29 +280,31 @@ const deleteDialogData = () => {
   showChangeDialog(false)
 }
 const showChangeDialog = (visible: boolean = false, dialogType?: DT, row?: BlogSpecial) => {
-  nextTick(() => {
-    if (dialogType) {
-      if (dialogType == DT.update) {
-        specialDialog.title = "修改专题"
-        specialDialog.dialogType = DT.update
-        if (row) {
-          coverUploadFile.length = 0
-          coverUploadFile.push({
-            url: globalInfo.imageUrl + row.blogSpecialCover,
-            name: row.blogSpecialName
-          })
+
+  if (dialogType) {
+    if (dialogType == DT.update) {
+      specialDialog.title = "修改专题"
+      specialDialog.dialogType = DT.update
+      if (row) {
+        coverUploadFile.length = 0
+        coverUploadFile.push({
+          url: globalInfo.imageUrl + row.blogSpecialCover,
+          name: row.blogSpecialName
+        })
+        nextTick(() => {
           Object.assign(specialDialogFormData, row)
-        }
-      } else if (dialogType == DT.add) {
-        specialDialog.title = "新增专题"
-        specialDialog.dialogType = DT.add
+        })
       }
+    } else if (dialogType == DT.add) {
+      specialDialog.title = "新增专题"
+      specialDialog.dialogType = DT.add
     }
-    if (!visible) {
-      //清空
-      resetForm(specialDialogFormRuleFormRef.value)
-    }
-  })
+  }
+  if (!visible) {
+    //清空
+    resetForm(specialDialogFormRuleFormRef.value)
+  }
+
   specialDialog.dialogVisible = visible
 }
 
@@ -334,16 +339,29 @@ async function submitForm(formEl: FormInstance | undefined) {
   await formEl.validate(async (valid) => {
     if (valid) {
       //添加
-      const res: any = await updateSpecialApi(specialDialogFormData)
+      let res: any
+      const userinfo = userStore.getUserInfo
+      if(specialDialog.dialogType == DT.add){
+        if (userinfo.userId && userinfo.userName) {
+          specialDialogFormData.userId = userinfo.userId
+          specialDialogFormData.userName = userinfo.userName
+        }
+      }else if(specialDialog.dialogType == DT.update){
+        if (userinfo.userId && userinfo.userName) {
+          specialDialogFormData.blogSpecialLastUpdateUserId = userinfo.userId
+          specialDialogFormData.blogSpecialLastUpdateUserName = userinfo.userName
+        }
+        specialDialogFormData.blogSpecialUpdateTime = null
+      }
+      res = await updateSpecialApi(specialDialogFormData)
       if (res.code == 200) {
         appearMessage.success(res.data)
-        coverUploadRef.value.dialogImageUrl = null
         deleteDialogData()
         await getTableData()
+        coverUploadRef.value.dialogImageUrl = null
       } else {
         appearMessage.error(res.message)
       }
-      return true
     } else {
       return false
     }
@@ -355,8 +373,9 @@ function resetForm(formEl: FormInstance | undefined) {
   if (!formEl) return
   formEl?.resetFields()
   //标签
-  articleTags.forEach(tag => tag.disabled = false)
+  articleTagsByList.forEach(tag => tag.articleTagDisable = 0)
   coverUploadFile.length = 0
+  Object.keys(specialDialogFormData).forEach(key => specialDialogFormData[key] = null)
 }
 
 
@@ -380,21 +399,10 @@ const deleteData = (row) => {
         return
       })
 }
+
 //标签
 const currentTag = ref("")
-const articleTags = reactive([
-  {
-    value: "12",
-    disabled: true
-  }, {
-    value: "11s",
-    disabled: false
-  },
-  {
-    value: "13",
-    disabled: false
-  }
-])
+const articleTagsByList = reactive<ArticleTag[]>([])
 
 /***
  * 当选择了一个标签的时候
@@ -404,9 +412,9 @@ const currentTagChange = (value) => {
   specialDialogFormData.articleTags?.push(value)
   currentTag.value = ""
   //设置为disable
-  articleTags.forEach(tag => {
-    if (tag.value == value) {
-      tag.disabled = true
+  articleTagsByList.forEach(tag => {
+    if (tag.articleTagName == value) {
+      tag.articleTagDisable = 1
     }
   })
 }
@@ -415,9 +423,9 @@ const currentTagChange = (value) => {
  * @param value
  */
 const handleCloseTag = (value: string) => {
-  articleTags.forEach(tag => {
-    if (tag.value == value) {
-      tag.disabled = false
+  articleTagsByList.forEach(tag => {
+    if (tag.articleTagName == value) {
+      tag.articleTagDisable = 0
     }
   })
   specialDialogFormData.articleTags.splice(specialDialogFormData.articleTags.indexOf(value), 1)
@@ -425,102 +433,40 @@ const handleCloseTag = (value: string) => {
 
 
 //专题文章树
-const blogSpecialArticleList = reactive([])
-const rowClick = (row) => {
+const blogArticleListByTree = reactive<BlogArticleForm[]>([])
+const rowClick = async (row: BlogSpecial) => {
   //行点击
-
-}
-//获取专题文章
-const loadBlogSpecialArticleList = () => {
-
-}
-
-
-const treeProps = {
-  children: 'children',
-  label: 'title',
-  value: 'blogId',
-}
-let id = 1000
-const append = (data) => {
-  const newChild = {id: id++, label: 'testtest', children: []}
-  if (!data.children) {
-    data.children = []
+  //树形 获得专题下的所有文章
+  if (row.blogSpecialId != null) {
+    const res: any = await getArticle4SpecialApi(row.blogSpecialId)
+    if(res.code == 200){
+      blogArticleListByTree.length = 0
+      blogArticleListByTree.push(...res.data)
+    }
   }
-  data.children.push(newChild)
-  dataSource.value = [...dataSource.value]
 }
 
-const remove = (node: Node, data) => {
-  const parent = node.parent
-  const children: Tree[] = parent.data.children || parent.data
-  const index = children.findIndex((d) => d.id === data.id)
-  children.splice(index, 1)
-  dataSource.value = [...dataSource.value]
+
+const remove = ( data) => {
+
 }
 
-interface Tree {
-  id: number
-  label: string
-  children?: Tree[]
+const getArticleTagListData =async () => {
+  const res: any = await getArticleTagListApi()
+  if (res.code == 200) {
+    articleTagsByList.length = 0
+    articleTagsByList.push(...res.data)
+  }
 }
-
-const dataSource = ref<Tree[]>([
-  {
-    id: 1,
-    label: 'Level one 1',
-    children: [
-      {
-        id: 4,
-        label: 'Level two 1-1',
-        children: [
-          {
-            id: 9,
-            label: 'Level three 1-1-1',
-          },
-          {
-            id: 10,
-            label: 'Level three 1-1-2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    label: 'Level one 2',
-    children: [
-      {
-        id: 5,
-        label: 'Level two 2-1',
-      },
-      {
-        id: 6,
-        label: 'Level two 2-2',
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: 'Level one 3',
-    children: [
-      {
-        id: 7,
-        label: 'Level two 3-1',
-      },
-      {
-        id: 8,
-        label: 'Level two 3-2',
-      },
-    ],
-  },
-])
-
+const getData = async () => {
+  //标签列表
+  await getArticleTagListData()
+}
 
 onMounted(() => {
   //获取数据
   // getTableData()
-
+  getData()
 })
 
 </script>
@@ -561,7 +507,6 @@ a:hover {
             display: flex;
             align-items: center;
             justify-content: space-between;
-
             span {
               margin-right: 25px;
             }
@@ -625,7 +570,8 @@ a:hover {
   justify-content: space-between;
   font-size: 14px;
   padding-right: 8px;
-  .node-button{
+
+  .node-button {
     display: flex;
   }
 }

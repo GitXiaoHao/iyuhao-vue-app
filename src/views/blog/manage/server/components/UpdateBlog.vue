@@ -41,7 +41,7 @@
               :rules="rules"
               label-width="120px"
               class="setting-form"
-              :size="formSize"
+              size="large"
               status-icon
           >
             <el-form-item label="文章标签" prop="articleTags">
@@ -90,6 +90,12 @@
                            v-for="category in categoryList"></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="文章专题" prop="blogSpecialName">
+              <el-select clearable placeholder="请选择专题" v-model="settingForm.blogSpecialName">
+                <el-option :label="special.blogSpecialName" :value="special.blogSpecialName"
+                           v-for="special in specialList"></el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="文章评论" prop="blogArticleAllowComment">
               <el-radio-group v-model="settingForm.blogArticleAllowComment">
                 <el-radio :label="1">允许</el-radio>
@@ -107,7 +113,6 @@
               ></el-input>
               <span style="color: red">注意：转载请确认原文允许转载，或者您已经获得原文作者授权。</span>
             </el-form-item>
-
           </el-form>
         </div>
       </div>
@@ -167,6 +172,7 @@ import {ArticleStatusType, ArticleType, BlogArticleForm} from "@/types/blog/arti
 import {ArticleTag, ArticleTagListByPage} from "@/types/blog/articleTag";
 import {getArticleTagListApi, getArticleTagListByTreeApi} from "@/apis/blog/articleTag";
 import {useUserStore} from "@/store/modules/user";
+import {BlogSpecial} from "@/types/blog/special";
 
 const emits = defineEmits(['closeDrawer', 'selectBlogListByPage'])
 const props = defineProps({
@@ -194,9 +200,9 @@ const handleClose = (done) => {
   //提示
   appearMessageBox("您所做的任务没有保存，是否继续?"
       , "提示", MsgType.warning, "确定", "取消")
-      .catch(reason => {
+      .catch(() => {
         return
-      }).then(r => {
+      }).then(() => {
     //内容删除
     mdTest.value = ""
     done()
@@ -225,11 +231,12 @@ const editorChange = (text, html) => {
 
 const userStore = useUserStore()
 const blogStore = useBlogStore()
-const formSize = ref<String>("large")
 const settingFormRef = ref<FormInstance>()
 const coverUploadRef = ref(null)
 const coverUploadFile = reactive([])
 const categoryList = ref<Array<BlogCategory>>(blogStore.getCategoryList)
+const specialList = ref<Array<BlogSpecial>>(blogStore.getSpecialList)
+
 let settingForm = reactive<BlogArticleForm>({
   articleTags: [],
   blogArticleId: null
@@ -248,8 +255,19 @@ const validateReprintUrl = (rule: any, value: any, callback: any) => {
     let matchUrl = /^(((ht|f)tps?):\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/
     if (!matchUrl.test(value)) {
       //
-      callback(new Error('转载链接不符合校验'))
+      callback(new Error('转载链接不符合规则'))
     }
+  }
+  callback()
+}
+
+const validateSpecialName = (rule: any, value: any, callback: any) => {
+  if(value != ''){
+    specialList.value.forEach(special => {
+      if(special.blogSpecialName == value){
+        settingForm.blogSpecialId = special.blogSpecialId
+      }
+    })
   }
   callback()
 }
@@ -261,6 +279,7 @@ const rules = reactive<FormRules<BlogArticleForm>>({
   blogArticleType: [{required: true, message: '请选择文章类型', trigger: 'change',},],
   blogArticleAllowComment: [{required: true, message: '请选择是否允许评论', trigger: 'change',},],
   blogArticleReprintUrl: [{validator: validateReprintUrl, trigger: 'blur'}],
+  blogSpecialName: [{validator: validateSpecialName, trigger: 'blur'}],
 })
 /**
  * 提交博客
@@ -276,8 +295,10 @@ const getBlog = async () => {
     if (props.type == DT.add) {
       //添加
       const userinfo = userStore.getUserInfo
-      settingForm.userId = userinfo.userId
-      settingForm.userName = userinfo.userName
+      if(userinfo.userName && userinfo.userId){
+        settingForm.userId = userinfo.userId
+        settingForm.userName = userinfo.userName
+      }
       res = await addBlogArticleApi(tags, settingForm)
     } else if (props.type == DT.update) {
       //修改

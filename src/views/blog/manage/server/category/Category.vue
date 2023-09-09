@@ -308,7 +308,6 @@ const categoryDialogForm = {
     const results = queryString
         ? categoryTypeList.filter(queryFilter(queryString))
         : categoryTypeList
-    // call callback function to return suggestion objects
     cb(results)
   }
 }

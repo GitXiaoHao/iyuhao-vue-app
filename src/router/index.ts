@@ -47,7 +47,7 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
             return
         })
     }
-    next();
+    next()
 })
 
 

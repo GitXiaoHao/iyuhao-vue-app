@@ -36,3 +36,13 @@ export function getSpecialListByPageApi(page: number, pageSize: number) {
         }
     })
 }
+
+export function getSpecialListApi() {
+    return httpInstance({
+        url: specialPath + `list`,
+        method: 'get',
+        data: {
+            "showLoading": false
+        }
+    })
+}

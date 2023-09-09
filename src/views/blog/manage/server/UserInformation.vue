@@ -155,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import {nextTick, onBeforeMount, onMounted, reactive, ref} from 'vue'
+import {nextTick, onMounted, reactive, ref} from 'vue'
 import CoverUpload from "@/components/CoverUpload.vue";
 import {FormInstance, FormRules} from "element-plus";
 import Dialog from "@/components/Dialog.vue";
@@ -180,9 +180,7 @@ const coverUploadRef = ref(null)
 const coverUploadFile = reactive([])
 const userInfoRef = ref<FormInstance>()
 let originalCover = null
-const userInfo = reactive<UserInfo>({
-
-})
+const userInfo = reactive<UserInfo>({})
 const validatePhone = (rule: any, value: any, callback: any) => {
   if (value !== '') {
     let phoneRep = /^(?:(?:\+|00)86)?1[3-9]\d{9}$/
@@ -387,15 +385,15 @@ onMounted(() => {
 
 onBeforeRouteLeave((to, from, next) => {
   //判断是否修改过
-  const bool = isObjectValueEqual(userStore.getUserInfo,userInfo);
-  if(bool){
+  const bool = isObjectValueEqual(userStore.getUserInfo, userInfo);
+  if (bool) {
     next()
     return
   }
-  appearMessageBox("您有未保存的数据，是否离开?","提示",MsgType.warning)
-  .then(() => {
-    next();
-  }).catch(() => {
+  appearMessageBox("您有未保存的数据，是否离开?", "提示", MsgType.warning)
+      .then(() => {
+        next();
+      }).catch(() => {
 
   });
 });
@@ -409,6 +407,7 @@ onBeforeRouteLeave((to, from, next) => {
   height: 100%;
   justify-content: center;
   align-items: center;
+
   .box-card {
     width: 100%;
     height: auto;
