@@ -92,8 +92,8 @@
             </el-form-item>
             <el-form-item label="文章评论" prop="blogArticleAllowComment">
               <el-radio-group v-model="settingForm.blogArticleAllowComment">
-                <el-radio label="1">允许</el-radio>
-                <el-radio label="0">不允许</el-radio>
+                <el-radio :label="1">允许</el-radio>
+                <el-radio :label="0">不允许</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="文章类型" prop="blogArticleType">
@@ -132,7 +132,7 @@
             >保存草稿
             </el-button>
             <el-button round size="large"
-
+                       disabled
             >定时发布
             </el-button>
             <el-button round size="large" type="danger"
@@ -155,17 +155,18 @@ import {ElDrawer} from "element-plus";
 import {deleteFile, uploadFile} from "@/apis/common";
 import {DT, globalInfo, MsgType} from "@/utils/constStr";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
-import {onMounted, reactive, ref} from 'vue'
+import { onMounted, reactive, ref} from 'vue'
 
 import CoverUpload from "@/components/CoverUpload.vue";
 import {useBlogStore} from "@/store/modules/blog";
 import go from "@/utils/common";
 import {Bottom, Top} from "@element-plus/icons-vue";
-import {getBlogApi} from "@/apis/blog/article";
+import {addBlogArticleApi, getArticleTag4relationshipApi, updateBlogArticleApi} from "@/apis/blog/article";
 import {BlogCategory} from "@/types/blog/category";
-import {ArticleType, BlogArticleForm} from "@/types/blog/article";
-import {ArticleTag,ArticleTagListByPage} from "@/types/blog/articleTag";
+import {ArticleStatusType, ArticleType, BlogArticleForm} from "@/types/blog/article";
+import {ArticleTag, ArticleTagListByPage} from "@/types/blog/articleTag";
 import {getArticleTagListApi, getArticleTagListByTreeApi} from "@/apis/blog/articleTag";
+import {useUserStore} from "@/store/modules/user";
 
 const emits = defineEmits(['closeDrawer', 'selectBlogListByPage'])
 const props = defineProps({
@@ -196,12 +197,6 @@ const handleClose = (done) => {
       .catch(reason => {
         return
       }).then(r => {
-    //删除图片
-    imageNames.forEach(async name => {
-      await deleteFile(name)
-    })
-    //图片删除
-    imageNames.length = 0
     //内容删除
     mdTest.value = ""
     done()
@@ -228,27 +223,16 @@ const editorChange = (text, html) => {
   settingForm.blogArticleContent = html
 }
 
-
+const userStore = useUserStore()
 const blogStore = useBlogStore()
 const formSize = ref<String>("large")
 const settingFormRef = ref<FormInstance>()
 const coverUploadRef = ref(null)
 const coverUploadFile = reactive([])
 const categoryList = ref<Array<BlogCategory>>(blogStore.getCategoryList)
-const settingForm = reactive<BlogArticleForm>({
-  blogArticleId: null,
+let settingForm = reactive<BlogArticleForm>({
   articleTags: [],
-  blogArticleTitle: null,
-  blogCategoryName: null,
-  blogArticleCover: null,
-  blogArticleContent: null,
-  blogArticleMarkdownContent: null,
-  blogArticleSummary: null,
-  blogArticleType: null,
-  blogArticleAllowComment: null,
-  blogArticleEditorType: null,
-  blogArticleReprintUrl: null,
-  blogStatusName: null,
+  blogArticleId: null
 })
 const validateArticleTags = (rule: any, value: any, callback: any) => {
   if (settingForm.articleTags?.length == 0) {
@@ -271,20 +255,8 @@ const validateReprintUrl = (rule: any, value: any, callback: any) => {
 }
 const rules = reactive<FormRules<BlogArticleForm>>({
   articleTags: [{validator: validateArticleTags, trigger: 'blur'}],
-  blogCategoryName: [
-    {
-      required: true,
-      message: '请选择文章分类',
-      trigger: 'blur',
-    },
-  ],
-  blogArticleSummary: [
-    {
-      required: true,
-      message: '请填写文章摘要',
-      trigger: 'blur',
-    },
-  ],
+  blogCategoryName: [{required: true, message: '请选择文章分类', trigger: 'blur',},],
+  blogArticleSummary: [{required: true, message: '请填写文章摘要', trigger: 'blur',},],
   blogArticleCover: [{required: true, message: "请上传封面", trigger: 'blur'},],
   blogArticleType: [{required: true, message: '请选择文章类型', trigger: 'change',},],
   blogArticleAllowComment: [{required: true, message: '请选择是否允许评论', trigger: 'change',},],
@@ -294,16 +266,27 @@ const rules = reactive<FormRules<BlogArticleForm>>({
  * 提交博客
  */
 const getBlog = async () => {
+  console.log(settingForm)
   if (validateBlogTitle()) {
     //true就正确
     settingForm.blogArticleEditorType = editorStr.value
     //提交
     const tags = settingForm.articleTags
-    const res: any = await getBlogApi(tags, settingForm)
+    let res: any
+    if (props.type == DT.add) {
+      //添加
+      const userinfo = userStore.getUserInfo
+      settingForm.userId = userinfo.userId
+      settingForm.userName = userinfo.userName
+      res = await addBlogArticleApi(tags, settingForm)
+    } else if (props.type == DT.update) {
+      //修改
+      settingForm.blogArticleUpdateTime = null
+      res = await updateBlogArticleApi(tags, settingForm)
+    }
     if (res.code == 200) {
       //提交成功
       appearMessage.success('保存成功')
-      delete settingForm['articleTags']
       setTimeout(() => {
         //跳转
         emits('closeDrawer')
@@ -320,9 +303,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      console.log(settingForm)
       getBlog()
-
     } else {
       console.log('error submit!', fields)
     }
@@ -333,11 +314,16 @@ const deleteSettingForm = () => {
   coverUploadRef.value.deletePic()
   //删除所有
   settingFormRef.value?.resetFields()
-
+  //删除图片
+  imageNames.forEach(async name => {
+    await deleteFile(name)
+  })
+  //图片删除
+  imageNames.length = 0
 }
 const submitDraft = () => {
   settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
-  settingForm.blogStatusName = "草稿"
+  settingForm.blogStatusName = ArticleStatusType.draft
   getBlog()
 }
 /**
@@ -345,7 +331,7 @@ const submitDraft = () => {
  */
 const postABlog = () => {
   settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
-  settingForm.blogStatusName = "已发布"
+  settingForm.blogStatusName = ArticleStatusType.release
   submitForm(settingFormRef.value)
 }
 
@@ -416,28 +402,43 @@ const checkPosition = () => {
 }
 const getArticleTagData = async () => {
   const res: any = await getArticleTagListByTreeApi()
-  if(res.code == 200){
+  if (res.code == 200) {
     articleTagsByTree.length = 0
     articleTagsByTree.push(...res.data)
   }
   const res2: any = await getArticleTagListApi()
-  if(res2.code == 200){
+  if (res2.code == 200) {
     articleTagsByList.length = 0
     articleTagsByList.push(...res2.data)
   }
 }
-const updateFormData = () => {
+const updateFormData = async () => {
   //修改
-  Object.assign(props.blogArticleData, settingForm)
-  mdTest.value = settingForm.blogArticleMarkdownContent
-  coverUploadFile.push({
-    url: globalInfo.imageUrl + settingForm.blogArticleCover,
-    name: settingForm.blogArticleTitle
-  })
+  settingForm = props.blogArticleData
+  if (settingForm.blogArticleId) {
+    if (settingForm.blogArticleMarkdownContent) {
+      mdTest.value = settingForm.blogArticleMarkdownContent
+    }
+    if (settingForm.blogArticleCover) {
+      coverUploadFile.push({
+        url: globalInfo.imageUrl + settingForm.blogArticleCover,
+        name: settingForm.blogArticleTitle
+      })
+    }
+    //标签
+    settingForm.articleTags = []
+    settingForm.articleTags.length = 0
+    const res: any = await getArticleTag4relationshipApi(settingForm.blogArticleId)
+    if (res.code == 200) {
+      for (let value in res.data) {
+        currentTagChange(value)
+      }
+    }
+  }
 }
 onMounted(() => {
   if (props.type == DT.update) {
-     updateFormData()
+    updateFormData()
   }
   //标签getArticleTagByTreeData()
   getArticleTagData()

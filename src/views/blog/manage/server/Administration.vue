@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import Table from "@/components/Table.vue";
-import {onMounted, reactive, ref} from "vue";
+import {nextTick, onMounted, reactive, ref} from "vue";
 import {useBlogStore} from "@/store/modules/blog";
 import {getCategoryList} from "@/apis/blog/category";
 import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
 import Cover from "@/components/Cover.vue";
-import {getArticleByPage} from "@/apis/blog/article";
+import {deleteArticleApi, getArticleByPage} from "@/apis/blog/article";
 import {getStatusListApi} from "@/apis/blog/status";
-import {DT} from "@/utils/constStr";
+import {DT, MsgType} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
 import {AdministrationSearchDataType, AdministrationTableDataType} from "@/types/blog/administration";
 import {BlogCategory} from "@/types/blog/category";
+import {ArticleStatusType, BlogArticleForm} from "@/types/blog/article";
 import {BlogStatus} from "@/types/blog/status";
+import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
 //搜索部分
 const addBlogStr = ref("新增博客")
 const dialog = ref(false)
+const dialogType = ref(DT.add)
+const blogArticleData = reactive<BlogArticleForm>({})
 const blogStore = useBlogStore()
 const searchFormData = reactive<AdministrationSearchDataType>({})
 const categoryList = ref<Array<BlogCategory>>(blogStore.getCategoryList)
@@ -42,6 +46,7 @@ const search = () => {
 }
 const addBlog = () => {
   dialog.value = true
+  dialogType.value = DT.add
 }
 //表格内容
 const tableData = reactive<DataSourceType<AdministrationTableDataType>>({
@@ -102,7 +107,14 @@ const columns = reactive<ColumnType[]>(
       },
       {
         label: '状态',
-        prop: 'blogStatusName',
+        prop: 'status',
+        align: 'center',
+        width: 100,
+        scopedSlots: 'status'
+      },
+      {
+        label: '创建人',
+        prop: 'userName',
         align: 'center',
         width: 100,
         scopedSlots: false
@@ -127,6 +139,30 @@ const columns = reactive<ColumnType[]>(
 const closeDrawer = () => {
   dialog.value = false
 }
+
+//文章操作
+const updateArticle = (blogArticle) => {
+  dialogType.value = DT.update
+  // Object.keys(blogArticleData).forEach(key => blogArticleData[key] = null)
+  Object.assign(blogArticleData,blogArticle)
+  dialog.value = true
+}
+const deleteArticle = async (blogArticle) => {
+  appearMessageBox("您确定要删除吗？","提示",MsgType.error)
+      .then(async r => {
+        //删除
+        const res: any = await deleteArticleApi(blogArticle)
+        if(res.code == 200){
+          appearMessage.success("删除成功")
+          await selectBlogListByPage()
+        }else{
+          appearMessage.error("删除失败")
+        }
+      }).catch(r => {
+        return
+  })
+}
+
 onMounted(() => {
   //博客状态
   selectStatusList()
@@ -188,8 +224,8 @@ onMounted(() => {
            class="admin-table"
     >
       <template #cover="{index,row}">
-        <div class="cover" v-if="row.blogCategoryCover">
-          <Cover :cover="row.blogCategoryCover"></Cover>
+        <div class="cover" v-if="row.blogArticleCover">
+          <Cover :cover="row.blogArticleCover"></Cover>
         </div>
       </template>
 <!--      文章信息-->
@@ -207,12 +243,22 @@ onMounted(() => {
           <div v-if="row.blogArticleType">转载地址：<a :href="row.blogArticleReprintUrl">{{row.blogArticleReprintUrl}}</a></div>
         </div>
       </template>
+      <template #status="{index,row}">
+        <template v-for="item in statusList">
+          <div v-if="item.blogStatusName == row.blogStatusName"
+              :style="{'color': item.blogStatusColor}"
+          >
+            {{row.blogStatusName}}
+          </div>
+        </template>
+      </template>
 <!--      文章评论-->
       <template #comment="{index,row}">
         <div class="col">
           <div>{{row.blogArticleAllowComment === 1 ? "允许" : "禁止"}}</div>
         </div>
       </template>
+
 <!--      文章时间-->
       <template #time="{index,row}">
         <div class="col">
@@ -221,18 +267,19 @@ onMounted(() => {
         </div>
       </template>
       <template #op="{index,row}">
-        <el-button type="success" @click="">修改</el-button>
+        <el-button type="success" @click="updateArticle(row)">修改</el-button>
         <el-divider direction="vertical"></el-divider>
-        <el-button type="warning" @click="">删除</el-button>
+        <el-button type="warning" @click="deleteArticle(row)">删除</el-button>
         <el-divider direction="vertical"></el-divider>
-        <el-button type="primary" @click="">预览</el-button>
+        <el-button type="primary" @click="" disabled>预览</el-button>
       </template>
     </Table>
 
     <UpdateBlog :title="addBlogStr"
              v-if="dialog"
              @closeDrawer="closeDrawer"
-             :type="DT.add"
+             :type="dialogType"
+                :blogArticleData="blogArticleData"
              @selectBlogListByPage="selectBlogListByPage"
     ></UpdateBlog>
   </div>

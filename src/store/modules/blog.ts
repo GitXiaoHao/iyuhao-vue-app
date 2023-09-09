@@ -10,7 +10,7 @@ import {BlogStatus} from "@/types/blog/status";
  */
 interface BlogStoreState {
     //分类集合
-    categoryList: Array<BlogCategory>,
+    categoryList: BlogCategory[],
     statusList: Array<BlogStatus>
 }
 
@@ -30,13 +30,15 @@ export const useBlogStore = defineStore({
         }
     },
     actions: {
-        setCategoryList(categoryList: BlogCategory) {
+        setCategoryList(categoryList: Array<BlogCategory>) {
             if (categoryList) {
+                this.categoryList.length = 0
                 Object.assign(this.categoryList, categoryList)
             }
         },
-        setStatusList(statusList: BlogStatus) {
+        setStatusList(statusList: BlogStatus[]) {
             if (statusList) {
+                this.statusList.length = 0
                 Object.assign(this.statusList, statusList)
             }
         }

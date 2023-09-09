@@ -3,24 +3,28 @@
     <el-image
         v-if="cover"
         :src="globalInfo.imageUrl + cover" alt="" :fit="fit"
-      :style="{'border-radius' : borderRadios + '%'}"
-              :preview-src-list="[globalInfo.imageUrl + cover]"
+        :style="{'border-radius' : borderRadios + '%'}"
+        :preview-src-list="[globalInfo.imageUrl + cover]"
+        preview-teleported
     >
       <template #error>
         <div class="image-slot">
-          <el-icon><icon-picture /></el-icon>
+          <el-icon>
+            <icon-picture/>
+          </el-icon>
         </div>
       </template>
     </el-image>
     <el-image v-else alt="" :fit="fit" :style="{'border-radius' : borderRadios + '%'}">
-      User
+      None
     </el-image>
   </div>
 </template>
 
 <script setup>
 import {globalInfo} from '@/utils/constStr'
-import { Picture as IconPicture } from '@element-plus/icons-vue'
+import {Picture as IconPicture} from '@element-plus/icons-vue'
+
 const props = defineProps({
   cover: {
     type: String,
@@ -39,15 +43,15 @@ const props = defineProps({
 </script>
 
 <style scoped lang="scss">
-.cover{
+.cover {
   display: flex;
   align-items: center;
-
   width: 100%;
   height: 100%;
   justify-content: center;
   overflow: hidden;
-  .el-image{
+
+  .el-image {
     width: 100%;
     max-width: 100%;
     max-height: 100%;

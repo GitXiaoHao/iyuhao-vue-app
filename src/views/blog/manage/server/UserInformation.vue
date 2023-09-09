@@ -406,11 +406,9 @@ onBeforeRouteLeave((to, from, next) => {
 <style scoped lang="scss">
 .skeleton-main {
   width: 100%;
-  height: auto;
+  height: 100%;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-
   .box-card {
     width: 100%;
     height: auto;

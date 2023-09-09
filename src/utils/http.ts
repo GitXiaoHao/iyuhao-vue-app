@@ -9,10 +9,11 @@ import {appearLoading, appearMessage,} from "@/utils/elementUtils";
 import {useUserStore} from "@/store/modules/user";
 import {accessTokenStr, baseURL} from "@/utils/constStr";
 import {useRouter} from "vue-router";
+import {nextTick} from "vue";
 
 
 let loading = null
-const router = useRouter()
+
 const userStore = useUserStore()
 // axios.defaults.withCredentials = true
 const httpInstance = axios.create({
@@ -72,7 +73,12 @@ httpInstance.interceptors.response.use(function (response) {
         userStore.setToken('')
         appearMessage.error("登陆超时")
         setTimeout(() => {
-            router.push("/login").then(r => {})
+            nextTick(() => {
+                const router = useRouter()
+                router.push("/login").then(r => {
+                })
+                // window.location.replace("https://www.runoob.com");
+             }).then(r =>{})
         },1000)
         return Promise.reject("登录超时")
     }

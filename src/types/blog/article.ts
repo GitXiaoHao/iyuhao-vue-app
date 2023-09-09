@@ -2,6 +2,11 @@ export enum ArticleType {
     original = "原创",
     reprint = "转载"
 }
+export enum ArticleStatusType{
+    draft = "草稿",
+    release = "已发布"
+}
+
 // 文章设置
 export interface BlogArticleForm {
     articleTags?: Array<String>
@@ -13,8 +18,15 @@ export interface BlogArticleForm {
     blogArticleContent?: String
     blogArticleMarkdownContent?: String
     blogArticleType?: ArticleType | null
-    blogArticleAllowComment?: String
+    blogArticleAllowComment?: Number
     blogArticleEditorType?: String
     blogArticleReprintUrl?: String
     blogStatusName?: String
+    userId?: String
+    userName?: String
+    blogArticleGoodNumber?:Number
+    blogArticleViewsNumber?:Number
+    blogArticleFavoriteNumber?:Number
+    blogArticleAddTime?:String
+    blogArticleUpdateTime?:String
 }
