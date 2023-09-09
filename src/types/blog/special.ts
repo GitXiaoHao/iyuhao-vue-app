@@ -14,17 +14,17 @@ export interface BlogSpecial{
     /**
      * 博客专题名称
      */
-    blogSpecialName:String
+    blogSpecialName?:String
 
     /**
      * 博客专题封面
      */
-    blogSpecialCover:String
+    blogSpecialCover?:String
 
     /**
      * 博客专题简介
      */
-    blogSpecialBriefIntroduction:String
+    blogSpecialBriefIntroduction?:String
 
     /**
      * 博客专题编辑人id

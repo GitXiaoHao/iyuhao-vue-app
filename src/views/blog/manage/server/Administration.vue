@@ -157,7 +157,6 @@ const closeDrawer = () => {
 //文章操作
 const updateArticle = (blogArticle) => {
   dialogType.value = DT.update
-  // Object.keys(blogArticleData).forEach(key => blogArticleData[key] = null)
   Object.assign(blogArticleData, blogArticle)
   dialog.value = true
 }

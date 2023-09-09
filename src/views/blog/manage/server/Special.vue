@@ -61,9 +61,9 @@
                 <span class="custom-tree-node">
                     <span>{{ node.blogArticle.blogArticleTitle }}</span>
                     <span class="node-button">
-                      <a @click="remove(data)">预览</a>
+                      <a @click="" disabled>预览</a>
                       <el-divider direction="vertical"></el-divider>
-                      <a @click="remove(data)">修改</a>
+                      <a @click="update(data)">修改</a>
                       <el-divider direction="vertical"></el-divider>
                       <a @click="remove(data)">删除</a>
                     </span>
@@ -142,6 +142,16 @@
 
     </el-form>
   </Dialog>
+
+
+  <UpdateBlog :title="blogStr"
+              v-if="dialog"
+              @closeDrawer="closeDrawer"
+              :type="dialogType"
+              :blogArticleData="blogArticleData"
+              @selectBlogListByPage="selectBlogArticleListByTree"
+  ></UpdateBlog>
+
 </template>
 
 <script setup lang="ts">
@@ -162,7 +172,8 @@ import {ArticleTag} from "@/types/blog/articleTag";
 import {getArticleTagListApi} from "@/apis/blog/articleTag";
 import {useUserStore} from "@/store/modules/user";
 import {BlogArticleForm} from "@/types/blog/article";
-import {getArticle4SpecialApi} from "@/apis/blog/article";
+import {deleteArticleApi, getArticle4SpecialApi, getArticleByPage} from "@/apis/blog/article";
+import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
 
 const userStore = useUserStore()
 const columns = reactive<ColumnType[]>(
@@ -379,6 +390,7 @@ function resetForm(formEl: FormInstance | undefined) {
 }
 
 
+
 /**
  * 删除数据
  * @param row
@@ -435,6 +447,8 @@ const handleCloseTag = (value: string) => {
 //专题文章树
 const blogArticleListByTree = reactive<BlogArticleForm[]>([])
 const rowClick = async (row: BlogSpecial) => {
+  //保存row
+  Object.assign(rowSpecial,row)
   //行点击
   //树形 获得专题下的所有文章
   if (row.blogSpecialId != null) {
@@ -446,10 +460,42 @@ const rowClick = async (row: BlogSpecial) => {
   }
 }
 
-
-const remove = ( data) => {
-
+const update = (data:BlogArticleForm) => {
+  dialogType.value = DT.update
+  Object.assign(blogArticleData,data)
+  dialog.value = true
 }
+
+const remove = (data:BlogArticleForm) => {
+  appearMessageBox("您确定要删除吗？", "提示", MsgType.error)
+      .then(async () => {
+        //删除
+        const res: any = await deleteArticleApi(data)
+        if (res.code == 200) {
+          appearMessage.success("删除成功")
+          await rowClick(rowSpecial)
+        } else {
+          appearMessage.error("删除失败")
+        }
+      }).catch(() => {
+    return
+  })
+}
+
+//树的操作
+const blogArticleData = reactive<BlogArticleForm>({})
+const rowSpecial = reactive<BlogSpecial>({})
+const blogStr = ref("修改文章")
+const dialog = ref(false)
+const dialogType = ref(DT.add)
+const closeDrawer = () => {
+  dialog.value = false
+}
+const selectBlogArticleListByTree = async () => {
+  await rowClick(rowSpecial)
+}
+
+
 
 const getArticleTagListData =async () => {
   const res: any = await getArticleTagListApi()
