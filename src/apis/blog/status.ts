@@ -21,6 +21,15 @@ export function getStatusByPageApi(page,pageSize) {
         }
     })
 }
+export function getSpecialByIdApi(id) {
+    return httpInstance({
+        url: statusPath + `get/${id}`,
+        method: 'get',
+        data: {
+            "showLoading": false
+        }
+    })
+}
 export function updateStatusApi(status: BlogStatus) {
     return httpInstance({
         url: statusPath + "update",

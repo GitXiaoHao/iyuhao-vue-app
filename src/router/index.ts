@@ -26,7 +26,9 @@ export const router: Router = new createRouter({
     linkActiveClass: 'active',
 })
 const defaultTitle = 'home';
-router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next) => {
+
+
+router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next) => {
     //是否有token
     document.title = to.meta.title ? to.meta.title : defaultTitle;
     if (to.path == '/login') {
@@ -37,9 +39,9 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
     if (!accessToken) {
         //没有token
         //弹窗
-        appearMessageBox("没有登陆，请先登录", "提示", MsgType.warning, '登录', '退出')
+        await appearMessageBox("没有登陆，请先登录", "提示", MsgType.warning, '登录', '退出')
             .then(r => {
-                router.push('/login').then(r => {
+                router.push('/login').then(() => {
                 })
                 return
             }).catch(r => {

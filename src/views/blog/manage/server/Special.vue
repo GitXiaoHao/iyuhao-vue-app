@@ -21,7 +21,7 @@
           >
             <template #cover="{index,row}">
               <div class="cover">
-                <Cover :cover="row.blogCategoryCover"></Cover>
+                <Cover :cover="row.blogSpecialCover"></Cover>
               </div>
             </template>
             <template #op="{index,row}">
@@ -366,10 +366,10 @@ async function submitForm(formEl: FormInstance | undefined) {
       }
       res = await updateSpecialApi(specialDialogFormData)
       if (res.code == 200) {
-        appearMessage.success(res.data)
+        appearMessage.success("添加成功")
+        coverUploadRef.value.dialogImageUrl = null
         deleteDialogData()
         await getTableData()
-        coverUploadRef.value.dialogImageUrl = null
       } else {
         appearMessage.error(res.message)
       }
@@ -421,7 +421,10 @@ const articleTagsByList = reactive<ArticleTag[]>([])
  * @param value
  */
 const currentTagChange = (value) => {
-  specialDialogFormData.articleTags?.push(value)
+  if(!specialDialogFormData.articleTags){
+    specialDialogFormData.articleTags = []
+  }
+  specialDialogFormData.articleTags.push(value)
   currentTag.value = ""
   //设置为disable
   articleTagsByList.forEach(tag => {

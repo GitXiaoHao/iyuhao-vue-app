@@ -11,10 +11,11 @@ import {DT, MsgType} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
 import {AdministrationSearchDataType, AdministrationTableDataType} from "@/types/blog/administration";
 import {BlogCategory} from "@/types/blog/category";
-import {BlogArticleForm} from "@/types/blog/article";
+import {BlogArticleForm,ArticleType} from "@/types/blog/article";
 import {BlogStatus} from "@/types/blog/status";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
 import {getSpecialListApi} from "@/apis/blog/special";
+import {BlogSpecial} from "@/types/blog/special";
 //搜索部分
 const addBlogStr = ref("新增博客")
 const dialog = ref(false)
@@ -24,6 +25,8 @@ const blogStore = useBlogStore()
 const searchFormData = reactive<AdministrationSearchDataType>({})
 const categoryList = ref<Array<BlogCategory>>(blogStore.getCategoryList)
 const statusList = ref<Array<BlogStatus>>(blogStore.getStatusList)
+const specialList = ref<Array<BlogSpecial>>(blogStore.getSpecialList)
+
 const selectCategoryList = async () => {
   const res: any = await getCategoryList()
   if (res.code == 200) {
@@ -47,6 +50,7 @@ const selectBlogListByPage = async (page: Number = 1, pageSize: Number = 5) => {
   if (res.code == 200) {
     Object.assign(tableData, res.data)
   }
+  console.log(tableData)
 }
 const search = () => {
   selectBlogListByPage()
@@ -110,7 +114,7 @@ const columns = reactive<ColumnType[]>(
         prop: 'blogSpecialName',
         width: 120,
         align: 'center',
-        scopedSlots: false
+        scopedSlots: 'blogSpecialName'
       },
       {
         label: '评论',
@@ -255,9 +259,16 @@ onMounted(() => {
       <template #typeName="{index,row}">
         <div class="col">
           <div>类型：{{ row.blogArticleType }}</div>
-          <div v-if="row.blogArticleType">转载地址：<a
+          <div v-if="row.blogArticleType == ArticleType.reprint">转载地址：<a
               :href="row.blogArticleReprintUrl">{{ row.blogArticleReprintUrl }}</a></div>
         </div>
+      </template>
+      <template #blogSpecialName="{index,row}">
+        <template v-for="item in specialList">
+          <div  v-if="item.blogSpecialId == row.blogSpecialId">
+            {{item.blogSpecialName}}
+          </div>
+        </template>
       </template>
       <template #status="{index,row}">
         <template v-for="item in statusList">

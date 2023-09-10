@@ -54,14 +54,16 @@ export const appearLoading = (text: string = "加载中") => {
 
 
 export const appearMessageBox = (msg: string, title: string, type: MsgType = MsgType.success, confirmButtonText: string = '确认', cancelButtonText: string = '取消') => {
-    return ElMessageBox.confirm(
-        msg,
-        title,
-        {
-            confirmButtonText: confirmButtonText,
-            cancelButtonText: cancelButtonText,
-            type: type,
-            center: true,
-        }
-    )
+    return  ElMessageBox.confirm(
+            msg,
+            title,
+            {
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: cancelButtonText,
+                type: type,
+                center: true,
+            }
+        )
 }
+
+

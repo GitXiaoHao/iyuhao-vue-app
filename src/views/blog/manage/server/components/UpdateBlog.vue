@@ -173,6 +173,7 @@ import {ArticleTag, ArticleTagListByPage} from "@/types/blog/articleTag";
 import {getArticleTagListApi, getArticleTagListByTreeApi} from "@/apis/blog/articleTag";
 import {useUserStore} from "@/store/modules/user";
 import {BlogSpecial} from "@/types/blog/special";
+import {getSpecialByIdApi} from "@/apis/blog/status";
 
 const emits = defineEmits(['closeDrawer', 'selectBlogListByPage'])
 const props = defineProps({
@@ -261,16 +262,6 @@ const validateReprintUrl = (rule: any, value: any, callback: any) => {
   callback()
 }
 
-const validateSpecialName = (rule: any, value: any, callback: any) => {
-  if(value != ''){
-    specialList.value.forEach(special => {
-      if(special.blogSpecialName == value){
-        settingForm.blogSpecialId = special.blogSpecialId
-      }
-    })
-  }
-  callback()
-}
 const rules = reactive<FormRules<BlogArticleForm>>({
   articleTags: [{validator: validateArticleTags, trigger: 'blur'}],
   blogCategoryName: [{required: true, message: '请选择文章分类', trigger: 'blur',},],
@@ -278,20 +269,25 @@ const rules = reactive<FormRules<BlogArticleForm>>({
   blogArticleCover: [{required: true, message: "请上传封面", trigger: 'blur'},],
   blogArticleType: [{required: true, message: '请选择文章类型', trigger: 'change',},],
   blogArticleAllowComment: [{required: true, message: '请选择是否允许评论', trigger: 'change',},],
-  blogArticleReprintUrl: [{validator: validateReprintUrl, trigger: 'blur'}],
-  blogSpecialName: [{validator: validateSpecialName, trigger: 'blur'}],
+  blogArticleReprintUrl: [{required: true,validator: validateReprintUrl, trigger: 'blur'}],
 })
 /**
  * 提交博客
  */
 const getBlog = async () => {
-  console.log(settingForm)
   if (validateBlogTitle()) {
     //true就正确
     settingForm.blogArticleEditorType = editorStr.value
     //提交
     const tags = settingForm.articleTags
     let res: any
+    if(settingForm.blogSpecialName){
+      specialList.value.forEach(special => {
+        if(special.blogSpecialName == settingForm.blogSpecialName){
+          settingForm.blogSpecialId = special.blogSpecialId
+        }
+      })
+    }
     if (props.type == DT.add) {
       //添加
       const userinfo = userStore.getUserInfo
@@ -342,10 +338,11 @@ const deleteSettingForm = () => {
   //图片删除
   imageNames.length = 0
 }
-const submitDraft = () => {
+const submitDraft = async () => {
+  console.log("123")
   settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
   settingForm.blogStatusName = ArticleStatusType.draft
-  getBlog()
+  await getBlog()
 }
 /**
  * 发布博客
@@ -380,7 +377,10 @@ const articleTagsByList = reactive<ArticleTag[]>([])
  * @param value
  */
 const currentTagChange = (value) => {
-  settingForm.articleTags?.push(value)
+  if(!settingForm.articleTags){
+    settingForm.articleTags = []
+  }
+  settingForm.articleTags.push(value)
   currentTag.value = ""
   //设置为disable
   articleTagsByList.forEach(tag => {
@@ -436,6 +436,11 @@ const getArticleTagData = async () => {
 const updateFormData = async () => {
   //修改
   settingForm = props.blogArticleData
+  //根据id 查找specialName
+  let res:any =  await getSpecialByIdApi(settingForm.blogSpecialId)
+  if(res.code == 200){
+    settingForm.blogSpecialName = res.data.blogSpecialName
+  }
   if (settingForm.blogArticleId) {
     if (settingForm.blogArticleMarkdownContent) {
       mdTest.value = settingForm.blogArticleMarkdownContent
@@ -449,10 +454,10 @@ const updateFormData = async () => {
     //标签
     settingForm.articleTags = []
     settingForm.articleTags.length = 0
-    const res: any = await getArticleTag4relationshipApi(settingForm.blogArticleId)
+    res = await getArticleTag4relationshipApi(settingForm.blogArticleId)
     if (res.code == 200) {
       for (let value in res.data) {
-        currentTagChange(value)
+        currentTagChange(res.data[value])
       }
     }
   }
