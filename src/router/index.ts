@@ -7,7 +7,7 @@
 
 import {createRouter, createWebHashHistory, RouteLocationNormalized, Router} from "vue-router";
 import type {App} from 'vue';
-import {accessTokenStr, MsgType} from "@/utils/constStr";
+import {MsgType} from "@/utils/constStr";
 import {useUserStore} from "@/store/modules/user";
 import {appearMessageBox} from "@/utils/elementUtils";
 import blogRouter from "@/router/modules/blog";

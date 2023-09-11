@@ -1,11 +1,11 @@
 import httpInstance from "@/utils/http";
 import {BlogCategory} from "@/types/blog";
 
-const blogPath = "/blog/"
+const blogPath = "/category/"
 
 export function getCategory(page: number, pageSize: number) {
     return httpInstance({
-        url: blogPath + `category/${page}/${pageSize}`,
+        url: blogPath + `${page}/${pageSize}`,
         method: 'get',
         data: {
             "showLoading": true
@@ -15,7 +15,7 @@ export function getCategory(page: number, pageSize: number) {
 
 export function getCategoryList() {
     return httpInstance({
-        url: blogPath + 'categoryList',
+        url: blogPath + 'list',
         method: 'get',
         data: {
             "showLoading": false
@@ -47,7 +47,7 @@ export function updateCategoryApi(category:BlogCategory){
 
 export function deleteCategory(category:BlogCategory){
     return httpInstance({
-        url: blogPath + 'category',
+        url: blogPath,
         method: 'delete',
         data: {
             ...category,

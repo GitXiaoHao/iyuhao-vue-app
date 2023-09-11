@@ -19,7 +19,6 @@
                 :default-active="menuList[0].children[0].id"
                 @open="handleOpen"
                 @close="handleClose"
-
             >
               <el-sub-menu :index="menuItem.id"
                            v-for="(menuItem) in menuList"

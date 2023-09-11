@@ -302,6 +302,8 @@ const getBlog = async () => {
       res = await updateBlogArticleApi(tags, settingForm)
     }
     if (res.code == 200) {
+      //防止删除
+      coverUploadRef.value.dialogImageUrl = null
       //提交成功
       appearMessage.success('保存成功')
       setTimeout(() => {
@@ -339,7 +341,6 @@ const deleteSettingForm = () => {
   imageNames.length = 0
 }
 const submitDraft = async () => {
-  console.log("123")
   settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
   settingForm.blogStatusName = ArticleStatusType.draft
   await getBlog()
