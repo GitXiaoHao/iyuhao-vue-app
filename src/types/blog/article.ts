@@ -6,7 +6,7 @@ export enum ArticleType {
 }
 export enum ArticleStatusType{
     draft = "草稿",
-    release = "已发布"
+    release = "发布"
 }
 
 // 文章设置

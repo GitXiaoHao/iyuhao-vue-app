@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
+import {nextTick, onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
 import {globalInfo} from '@/utils/constStr'
 import { Delete, Download, Plus, ZoomIn } from '@element-plus/icons-vue'
 import {genFileId, UploadRequestOptions} from 'element-plus'
@@ -148,7 +148,9 @@ defineExpose({
   dialogImageUrl,
 })
 
+onMounted(() => {
 
+})
 
 </script>
 

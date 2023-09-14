@@ -74,7 +74,8 @@ httpInstance.interceptors.response.use(function (response) {
         appearMessage.error("登陆超时")
         setTimeout(() => {
             nextTick(() => {
-                window.location.replace("/login");
+                const router = useRouter()
+                router.push('/login').then(r => {})
              }).then(r =>{})
         },1000)
         return Promise.reject("登录超时")

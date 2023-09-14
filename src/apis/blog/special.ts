@@ -37,6 +37,15 @@ export function getSpecialListByPageApi(page: number, pageSize: number) {
     })
 }
 
+export function getSpecialByIdApi(id) {
+    return httpInstance({
+        url: specialPath + `get/${id}`,
+        method: 'get',
+        data: {
+            "showLoading": false
+        }
+    })
+}
 export function getSpecialListApi() {
     return httpInstance({
         url: specialPath + `list`,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Table from "@/components/Table.vue";
-import {onMounted, reactive, ref} from "vue";
+import {nextTick, onMounted, reactive, ref} from "vue";
 import {useBlogStore} from "@/store/modules/blog";
 import {getCategoryList} from "@/apis/blog/category";
 import {ColumnType, DataSourceType, OptionsType} from "@/types/table";
@@ -11,16 +11,17 @@ import {DT, MsgType} from "@/utils/constStr";
 import UpdateBlog from "@/views/blog/manage/server/components/UpdateBlog.vue";
 import {AdministrationSearchDataType, AdministrationTableDataType} from "@/types/blog/administration";
 import {BlogCategory} from "@/types/blog/category";
-import {BlogArticleForm,ArticleType} from "@/types/blog/article";
+import {BlogArticleForm, ArticleType} from "@/types/blog/article";
 import {BlogStatus} from "@/types/blog/status";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
 import {getSpecialListApi} from "@/apis/blog/special";
 import {BlogSpecial} from "@/types/blog/special";
 //搜索部分
 const addBlogStr = ref("新增博客")
+const blogTitle = ref("新增博客")
 const dialog = ref(false)
 const dialogType = ref(DT.add)
-const blogArticleData = reactive<BlogArticleForm>({})
+const blogArticleData = ref<BlogArticleForm>({})
 const blogStore = useBlogStore()
 const searchFormData = reactive<AdministrationSearchDataType>({})
 const categoryList = ref<Array<BlogCategory>>(blogStore.getCategoryList)
@@ -57,6 +58,7 @@ const search = () => {
 }
 const addBlog = () => {
   dialog.value = true
+  blogTitle.value = "新增博客"
   dialogType.value = DT.add
 }
 //表格内容
@@ -159,10 +161,13 @@ const closeDrawer = () => {
 }
 
 //文章操作
-const updateArticle = (blogArticle) => {
+const updateArticle = (blogArticle: BlogArticleForm) => {
   dialogType.value = DT.update
-  Object.assign(blogArticleData, blogArticle)
-  dialog.value = true
+  blogTitle.value = "修改博客"
+  Object.assign(blogArticleData.value, blogArticle)
+  nextTick(() => {
+    dialog.value = true
+  })
 }
 const deleteArticle = async (blogArticle) => {
   appearMessageBox("您确定要删除吗？", "提示", MsgType.error)
@@ -180,15 +185,15 @@ const deleteArticle = async (blogArticle) => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   //博客专题
-  selectSpecialList()
+  await selectSpecialList()
   //博客状态
-  selectStatusList()
+  await selectStatusList()
   //分类类型
-  selectCategoryList()
+  await selectCategoryList()
   //博客列表
-  selectBlogListByPage()
+  await selectBlogListByPage()
 })
 
 </script>
@@ -265,8 +270,8 @@ onMounted(() => {
       </template>
       <template #blogSpecialName="{index,row}">
         <template v-for="item in specialList">
-          <div  v-if="item.blogSpecialId == row.blogSpecialId">
-            {{item.blogSpecialName}}
+          <div v-if="item.blogSpecialId == row.blogSpecialId">
+            {{ item.blogSpecialName }}
           </div>
         </template>
       </template>
@@ -302,7 +307,7 @@ onMounted(() => {
       </template>
     </Table>
 
-    <UpdateBlog :title="addBlogStr"
+    <UpdateBlog :title="blogTitle"
                 v-if="dialog"
                 @closeDrawer="closeDrawer"
                 :type="dialogType"

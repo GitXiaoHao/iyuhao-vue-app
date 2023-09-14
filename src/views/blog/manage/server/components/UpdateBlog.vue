@@ -160,7 +160,7 @@ import {ElDrawer} from "element-plus";
 import {deleteFile, uploadFile} from "@/apis/common";
 import {DT, globalInfo, MsgType} from "@/utils/constStr";
 import {appearMessage, appearMessageBox} from "@/utils/elementUtils";
-import { onMounted, reactive, ref} from 'vue'
+import {nextTick, onMounted, reactive, ref} from 'vue'
 
 import CoverUpload from "@/components/CoverUpload.vue";
 import {useBlogStore} from "@/store/modules/blog";
@@ -173,7 +173,7 @@ import {ArticleTag, ArticleTagListByPage} from "@/types/blog/articleTag";
 import {getArticleTagListApi, getArticleTagListByTreeApi} from "@/apis/blog/articleTag";
 import {useUserStore} from "@/store/modules/user";
 import {BlogSpecial} from "@/types/blog/special";
-import {getSpecialByIdApi} from "@/apis/blog/status";
+import {getSpecialByIdApi} from "@/apis/blog/special";
 
 const emits = defineEmits(['closeDrawer', 'selectBlogListByPage'])
 const props = defineProps({
@@ -261,15 +261,24 @@ const validateReprintUrl = (rule: any, value: any, callback: any) => {
   }
   callback()
 }
+const validateArticleCover = (rule: any, value: any, callback: any) => {
+  console.log(settingForm.blogArticleCover )
+  if (coverUploadRef.value.dialogImageUrl) {
+    settingForm.blogArticleCover = coverUploadRef.value.dialogImageUrl
+    callback()
+  }else{
+    callback(new Error("请上传封面"))
+  }
+}
 
 const rules = reactive<FormRules<BlogArticleForm>>({
   articleTags: [{validator: validateArticleTags, trigger: 'blur'}],
   blogCategoryName: [{required: true, message: '请选择文章分类', trigger: 'blur',},],
   blogArticleSummary: [{required: true, message: '请填写文章摘要', trigger: 'blur',},],
-  blogArticleCover: [{required: true, message: "请上传封面", trigger: 'blur'},],
+  blogArticleCover: [{required: true, validator: validateArticleCover, trigger: 'blur'},],
   blogArticleType: [{required: true, message: '请选择文章类型', trigger: 'change',},],
   blogArticleAllowComment: [{required: true, message: '请选择是否允许评论', trigger: 'change',},],
-  blogArticleReprintUrl: [{required: true,validator: validateReprintUrl, trigger: 'blur'}],
+  blogArticleReprintUrl: [{required: true, validator: validateReprintUrl, trigger: 'blur'}],
 })
 /**
  * 提交博客
@@ -281,9 +290,9 @@ const getBlog = async () => {
     //提交
     const tags = settingForm.articleTags
     let res: any
-    if(settingForm.blogSpecialName){
+    if (settingForm.blogSpecialName) {
       specialList.value.forEach(special => {
-        if(special.blogSpecialName == settingForm.blogSpecialName){
+        if (special.blogSpecialName == settingForm.blogSpecialName) {
           settingForm.blogSpecialId = special.blogSpecialId
         }
       })
@@ -291,7 +300,7 @@ const getBlog = async () => {
     if (props.type == DT.add) {
       //添加
       const userinfo = userStore.getUserInfo
-      if(userinfo.userName && userinfo.userId){
+      if (userinfo.userName && userinfo.userId) {
         settingForm.userId = userinfo.userId
         settingForm.userName = userinfo.userName
       }
@@ -378,7 +387,7 @@ const articleTagsByList = reactive<ArticleTag[]>([])
  * @param value
  */
 const currentTagChange = (value) => {
-  if(!settingForm.articleTags){
+  if (!settingForm.articleTags) {
     settingForm.articleTags = []
   }
   settingForm.articleTags.push(value)
@@ -437,19 +446,25 @@ const getArticleTagData = async () => {
 const updateFormData = async () => {
   //修改
   settingForm = props.blogArticleData
+  let res: any
   //根据id 查找specialName
-  let res:any =  await getSpecialByIdApi(settingForm.blogSpecialId)
-  if(res.code == 200){
-    settingForm.blogSpecialName = res.data.blogSpecialName
+  if (settingForm.blogSpecialId) {
+    res = await getSpecialByIdApi(settingForm.blogSpecialId)
+    if (res.code == 200) {
+      settingForm.blogSpecialName = res.data.blogSpecialName
+    }
+  }
+  if (settingForm.blogArticleMarkdownContent) {
+    mdTest.value = settingForm.blogArticleMarkdownContent
   }
   if (settingForm.blogArticleId) {
-    if (settingForm.blogArticleMarkdownContent) {
-      mdTest.value = settingForm.blogArticleMarkdownContent
-    }
     if (settingForm.blogArticleCover) {
-      coverUploadFile.push({
-        url: globalInfo.imageUrl + settingForm.blogArticleCover,
-        name: settingForm.blogArticleTitle
+      await nextTick(() => {
+        coverUploadFile.push({
+          url: globalInfo.imageUrl + settingForm.blogArticleCover,
+          name: settingForm.blogArticleTitle
+        })
+        coverUploadRef.value.dialogImageUrl = settingForm.blogArticleCover
       })
     }
     //标签
@@ -465,9 +480,10 @@ const updateFormData = async () => {
 }
 onMounted(() => {
   if (props.type == DT.update) {
-    updateFormData()
+    nextTick(() => {
+      updateFormData()
+    })
   }
-  //标签getArticleTagByTreeData()
   getArticleTagData()
 })
 </script>
