@@ -21,7 +21,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {globalInfo} from '@/utils/constStr'
 import {Picture as IconPicture} from '@element-plus/icons-vue'
 

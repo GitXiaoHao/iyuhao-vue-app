@@ -1,12 +1,11 @@
 import httpInstance from "@/utils/http";
-import {BlogStatus} from "@/types/blog/status";
 import {CategoryType} from "@/types/blog/categoryType";
 
 const ctPath = "/ct/"
 
 export function getCategoryTypeByPageApi(page: number, pageSize: number) {
     return httpInstance({
-        url: ctPath + `/${page}/${pageSize}`,
+        url: ctPath + `${page}/${pageSize}`,
         method: 'get',
         data: {
             "showLoading": true
@@ -16,7 +15,7 @@ export function getCategoryTypeByPageApi(page: number, pageSize: number) {
 
 export function getCategoryTypeListApi() {
     return httpInstance({
-        url: ctPath + `/list`,
+        url: ctPath + `list`,
         method: 'get',
         data: {
             "showLoading": false

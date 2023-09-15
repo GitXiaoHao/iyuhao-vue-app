@@ -315,7 +315,6 @@ const handleSelect = (item: CategoryType) =>{
   if (item.blogCategoryTypeName != null) {
     categoryDialogForm.categoryDialogFormData.blogCategoryType = item.blogCategoryTypeName
   }
-  console.log(item)
 }
 const queryFilter  = (queryString) =>{
   return (restaurant: CategoryType) => {

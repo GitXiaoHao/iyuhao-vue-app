@@ -74,7 +74,7 @@
                       <el-divider direction="vertical"></el-divider>
                       <a @click="deleteData( data.articleTag)">删除</a>
                       <el-divider direction="vertical"></el-divider>
-                      <a @click="append(data.articleTag)">新增下级文章</a>
+                      <a @click="append(data.articleTag)">新增下级标签</a>
                     </span>
                 </span>
               </template>
@@ -225,7 +225,6 @@ const getTreeData = async () => {
     dataSourceTree.length = 0
     dataSourceTree.push(...res.data)
   }
-  console.log(res.data)
 }
 const getTableData = async (page: number = 1, pageSize: number = 5) => {
   const res: any = await getArticleTagListByPageApi(page, pageSize)
@@ -331,6 +330,7 @@ async function submitForm(formEl: FormInstance | undefined) {
         articleTagDialogFormData.articleTagLastUpdateUserName = userinfo.userName
         articleTagDialogFormData.articleTagUpdateTime = null
         res = await updateArticleTagApi(articleTagDialogFormData)
+        console.log(articleTagDialogFormData)
       }
       if (res.code == 200) {
         appearMessage.success("success")
@@ -383,7 +383,6 @@ const parentChange = (value) => {
 
 
 const append = (data) => {
-  console.log(data)
   //增加下级文章
   articleTagDialogFormData.articleTagParentId = data.articleTagId
   articleTagDialogFormData.articleTagParentName = data.articleTagName

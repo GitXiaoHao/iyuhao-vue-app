@@ -37,7 +37,7 @@ export function addArticleTagApi(at:ArticleTag) {
 export function updateArticleTagApi(at:ArticleTag) {
     return httpInstance({
         url: articleTagPath + "update",
-        method: 'post',
+        method: 'put',
         data: {
             ...at,
             "showLoading": true
