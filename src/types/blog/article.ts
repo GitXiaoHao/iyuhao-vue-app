@@ -1,4 +1,3 @@
-import {BlogSpecial} from "@/types/blog/special";
 
 export enum ArticleType {
     original = "原创",

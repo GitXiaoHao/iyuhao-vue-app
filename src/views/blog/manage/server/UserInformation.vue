@@ -173,6 +173,7 @@ import {deleteFile} from "@/apis/common";
 import md5 from "js-md5";
 import {onBeforeRouteLeave} from "vue-router";
 import {isObjectValueEqual} from "@/utils/common";
+import {router} from "@/router";
 
 
 const userStore = useUserStore()
@@ -200,6 +201,7 @@ const validateCover = (rule: any, value: any, callback: any) => {
       originalCover = userInfo.userCover
     }
     userInfo.userCover = coverUploadRef.value.dialogImageUrl
+    callback()
   }
 }
 const validateEmail = (rule: any, value: any, callback: any) => {
@@ -230,6 +232,7 @@ const cancel = () => {
  * 保存用户信息
  */
 const saveUserInfo = async () => {
+  console.log("123")
   const res: any = await saveUserInfoApi(userInfo)
   if (res.code == 200) {
     //删除头像
@@ -237,6 +240,7 @@ const saveUserInfo = async () => {
     //滞空
     appearMessage.success("保存成功")
     userStore.setUserInfo(res.data)
+    router.go(0)
     initUserInfo()
   }
 }
@@ -245,7 +249,6 @@ const saveInfo = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      coverUploadRef.value
       saveUserInfo()
     } else {
 
@@ -373,6 +376,7 @@ const initUserInfo = () => {
     url: globalInfo.imageUrl + userInfo.userCover,
     name: userInfo.userName
   })
+  coverUploadRef.value.dialogImageUrl = userInfo.userCover
 }
 
 

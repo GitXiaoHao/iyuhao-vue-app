@@ -38,8 +38,8 @@ const tableData = reactive<DataSourceType<UserInfo>>({
   size: 1,
   current: 1,
 })
-const loadDataList = () => {
-
+const loadDataList = async (page: Number, pageSize?: Number) => {
+  await selectBlogListByPage(page, pageSize)
 }
 const tableOptions = reactive<OptionsType>({
   border: false,
@@ -144,7 +144,7 @@ onMounted(() => {
            :data-source="tableData"
            :fetch="loadDataList"
            :options="tableOptions"
-           :init-fetch="false"
+           :init-fetch="true"
            class="admin-table"
     >
       <template #cover="{index,row}">

@@ -98,6 +98,7 @@ import {ButtonType, DT, globalInfo, MsgType} from "@/utils/constStr";
 import {BlogCategory} from "@/types/blog/category";
 import {getCategoryTypeListApi} from "@/apis/blog/categoryType";
 import {CategoryType} from "@/types/blog/categoryType";
+import {validateNameApi} from "@/apis/user";
 
 //分类类型
 const categoryTypeList = reactive<CategoryType[]>([])
@@ -253,7 +254,23 @@ const showChangeDialog = (visible: boolean = false, dialogType?: DT, row?: BlogC
   categoryDialog.dialogVisible = visible
 }
 
-
+function validateCategoryType(rule: any, value: any, callback: any) {
+  if(value == ''){
+    callback(new Error("请填写分类类型"))
+  }else{
+    let res = false
+    categoryTypeList.forEach(item => {
+      if(item.blogCategoryTypeName == value){
+        res = true
+        return
+      }
+    })
+    if(!res){
+      callback(new Error("请填写正确的分类类型!"))
+    }
+  }
+  callback()
+}
 const categoryDialogForm = {
   categoryDialogFormRuleFormRef: ref<FormInstance>(),
   categoryDialogFormData: reactive<BlogCategory>({
@@ -270,8 +287,9 @@ const categoryDialogForm = {
       {required: true, message: "请填写简介", trigger: 'blur'},
       {max: 250, message: '字数不能超过250个字', trigger: 'blur'}
     ],
+
     blogCategoryName: {required: true, message: '请输入分类名称', trigger: 'blur'},
-    blogCategoryType: {required: true, message: '请选择分类类型', trigger: 'blur'},
+    blogCategoryType: {validator: validateCategoryType, trigger: 'blur'},
   }),
   async submitForm(formEl: FormInstance | undefined) {
     if (!formEl) return false

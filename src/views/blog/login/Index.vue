@@ -29,7 +29,9 @@
                   </template>
                 </el-input>
               </el-form-item>
-              <el-button class="form-button" @click="submitForm(loginFormRef)">登录</el-button>
+              <el-button class="form-button"
+                         @keyup.enter="submitForm(loginFormRef)"
+                         @click="submitForm(loginFormRef)">登录</el-button>
             </el-form>
           </div>
       </div>

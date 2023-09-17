@@ -51,7 +51,6 @@ const selectBlogListByPage = async (page: Number = 1, pageSize: Number = 5) => {
   if (res.code == 200) {
     Object.assign(tableData, res.data)
   }
-  console.log(tableData)
 }
 const search = () => {
   selectBlogListByPage()
@@ -209,7 +208,7 @@ onMounted(async () => {
         <div class="row">
           <div class="col-md-2">
             <el-form-item label="标题" prop="titleFuzzy">
-              <el-input placeholder="请输入名称" v-model="searchFormData.searchCategoryName"></el-input>
+              <el-input placeholder="请输入名称" v-model="searchFormData.titleFuzzy"></el-input>
             </el-form-item>
           </div>
           <div class="col-md-2">

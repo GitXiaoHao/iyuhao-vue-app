@@ -45,9 +45,9 @@
           <div class="special-blog-tree" v-else>
             <div class="tree-title">
                 <span>
-                  标题
+                  {{rowSpecial.blogSpecialName}}
                 </span>
-              <a>
+              <a @click="addArticle">
                 新增文章
               </a>
             </div>
@@ -59,7 +59,7 @@
             >
               <template #default="{node,data}">
                 <span class="custom-tree-node">
-                    <span>{{ node.blogArticle.blogArticleTitle }}</span>
+                    <span>{{ data.blogArticleTitle }}</span>
                     <span class="node-button">
                       <a @click="" disabled>预览</a>
                       <el-divider direction="vertical"></el-divider>
@@ -449,6 +449,11 @@ const handleCloseTag = (value: string) => {
 
 //专题文章树
 const blogArticleListByTree = reactive<BlogArticleForm[]>([])
+const addArticle = () => {
+  dialogType.value = DT.add
+  Object.keys(blogArticleData).forEach(key => blogArticleData[key] = null)
+  dialog.value = true
+}
 const rowClick = async (row: BlogSpecial) => {
   //保存row
   Object.assign(rowSpecial,row)

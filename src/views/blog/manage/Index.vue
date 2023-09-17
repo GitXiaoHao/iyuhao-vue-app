@@ -123,12 +123,6 @@ const menuList = reactive([
         disabled: false,
         path: '/administration',
       },
-      {
-        id: '1232',
-        title: '标签管理',
-        disabled: false,
-        path: '/at',
-      },
     ],
   },
   {
